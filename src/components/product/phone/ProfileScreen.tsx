@@ -1,9 +1,10 @@
-import { BookOpen, CalendarCheck, Flame, GraduationCap, PiggyBank, RotateCcw, Target, TrendingDown, Trophy, Users, Wallet, type LucideIcon } from "lucide-react";
+import { Bell, BookOpen, CalendarCheck, ChevronRight, CircleHelp, Globe, Landmark, Lock, LogOut, Moon, Shield, Sparkles, Flame, UserRound, GraduationCap, PiggyBank, RotateCcw, Target, TrendingDown, Trophy, Users, Wallet, type LucideIcon } from "lucide-react";
 import BrokieMascot from "../../brand/BrokieMascot";
 import { ProgressBar } from "../GameUI";
 import { FRIENDS, PROFILE, levelTitle, levelXp } from "@/data/challenges";
 import { catMeta, type Cat } from "@/data/students";
 import { useGame, useStudent, type GameState } from "@/hooks/use-game";
+import { useOpenSheet } from "./sheets";
 
 const FOCUS_SHORT: Partial<Record<Cat, string>> = { eatingOut: "Eating-out", fun: "Fun budget", shopping: "Shopping" };
 
@@ -21,6 +22,7 @@ const achievements = (s: GameState, focusLabel: string): { id: string; icon: Luc
 
 /* Level, streaks, achievements and the weekly friend league. */
 const ProfileScreen = () => {
+  const open = useOpenSheet();
   const p = PROFILE;
   const { state, restart, goTo } = useGame();
   const { student, focus } = useStudent();
@@ -68,6 +70,12 @@ const ProfileScreen = () => {
         ))}
       </ul>
 
+      <button type="button" onClick={() => open({ kind: "wrapped" })} className="mt-4 w-full flex items-center gap-2.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.09] px-3 py-2.5 text-left">
+        <Sparkles className="w-4 h-4 text-accent shrink-0" aria-hidden="true" />
+        <span className="flex-1 text-[13px] font-extrabold">October, wrapped</span>
+        <ChevronRight className="w-4 h-4 text-white/40" aria-hidden="true" />
+      </button>
+
       <h3 className="text-[11px] font-extrabold text-white/50 mt-5 mb-2">Achievements</h3>
       <ul className="grid grid-cols-4 gap-1.5">
         {achievements(state, FOCUS_SHORT[focus] ?? catMeta(focus).label).map(({ id, icon: Icon, title, unlocked }) => (
@@ -95,6 +103,32 @@ const ProfileScreen = () => {
           );
         })}
       </ol>
+
+      {/* settings: shown to make the app feel complete; the pages behind them aren't part of the demo */}
+      <h3 className="text-[11px] font-extrabold text-white/50 mt-5 mb-1.5">Settings</h3>
+      <ul className="rounded-2xl bg-white/[0.05] divide-y divide-white/[0.06] overflow-hidden">
+        {[
+          { icon: UserRound, label: "Profile", value: `@${student.handle.replace("_", ".")}` },
+          { icon: Landmark, label: "Bank connections", value: student.bank },
+          { icon: Bell, label: "Notifications", value: student.frequency },
+          { icon: Globe, label: "Language", value: student.language },
+          { icon: Moon, label: "Appearance", value: "Dark" },
+          { icon: Lock, label: "Privacy and data" },
+          { icon: Shield, label: "Privacy policy" },
+          { icon: CircleHelp, label: "Help and support" },
+        ].map(({ icon: Icon, label, value }) => (
+          <li key={label} className="flex items-center gap-3 px-3 py-2.5 text-[12.5px] font-extrabold">
+            <Icon className="w-4 h-4 shrink-0 text-white/55" aria-hidden="true" />
+            <span className="flex-1">{label}</span>
+            {value && <span className="text-[11.5px] font-bold text-white/45 truncate max-w-[45%]">{value}</span>}
+            <ChevronRight className="w-3.5 h-3.5 shrink-0 text-white/30" aria-hidden="true" />
+          </li>
+        ))}
+        <li className="flex items-center gap-3 px-3 py-2.5 text-[12.5px] font-extrabold text-destructive">
+          <LogOut className="w-4 h-4 shrink-0" aria-hidden="true" />
+          Log out
+        </li>
+      </ul>
 
       <div className="mt-5 flex flex-col items-center gap-1">
         <button type="button" onClick={() => goTo("student")} className="flex items-center gap-1.5 h-9 px-3.5 rounded-xl bg-white/10 hover:bg-white/15 text-[12px] font-black">

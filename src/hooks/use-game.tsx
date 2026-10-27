@@ -11,10 +11,13 @@ export type OnboardingStep = "auth" | "student" | "banks" | "analyzing" | "resul
 export const ONBOARDING_STEPS: OnboardingStep[] = ["auth", "student", "banks", "analyzing", "results", "budget", "goal", "done"];
 
 export type Goal = { name: string; target: number; saved: number; date?: string };
-export type Contribution = { id: number; amount: number; day: number };
+export type Contribution = { id: number; amount: number; day: number; source: "you" | "bank"; goal?: string };
+export type Savings = { linked: boolean; balance: number }; // the student's own savings account at their bank
 
 export type AppEvent =
   | { key: number; kind: "goal-add"; amount: number }
+  | { key: number; kind: "transfer"; amount: number }
+  | { key: number; kind: "bought-anyway"; what: string }
   | { key: number; kind: "goal-created" }
   | { key: number; kind: "budget-checked"; days: number }
   | { key: number; kind: "challenge-done"; id: ChallengeId; xp: number }
@@ -28,8 +31,10 @@ export type GameState = {
   banks: string[];
   budget: Budget;
   budgetConfirmed: boolean;
-  goal: Goal | null;
+  goal: Goal | null; // the active goal: top of the stack, the one savings and challenges work on
+  moreGoals: Goal[]; // the rest of the stack, in swipe order
   contributions: Contribution[];
+  savings: Savings;
   day: number; // demo days passed since the plan was made (moved only by "simulate next day")
   checks: { days: number; lastDay: number };
   challenges: Record<ChallengeId, ChallengeStatus>;
@@ -50,7 +55,12 @@ type Action =
   | { type: "resetBudget" }
   | { type: "confirmBudget" }
   | { type: "saveGoal"; goal: Goal }
+  | { type: "addGoal"; goal: Goal }
+  | { type: "cycleGoal"; dir: 1 | -1 }
   | { type: "addToGoal"; amount: number }
+  | { type: "linkSavings" }
+  | { type: "transferToSavings"; amount: number }
+  | { type: "boughtAnyway"; what: string }
   | { type: "checkBudget" }
   | { type: "nextDay" }
   | { type: "monthEnd" }
@@ -68,7 +78,9 @@ export const freshState = (studentId = FEATURED_ID): GameState => ({
   budget: { ...modelFor(studentId).suggested },
   budgetConfirmed: false,
   goal: null,
+  moreGoals: [],
   contributions: [],
+  savings: { linked: false, balance: 0 },
   day: 0,
   checks: { days: 0, lastDay: -99 },
   challenges: { "goal-add": "active", "check-budget": "active", "focus-budget": "active" },
@@ -114,6 +126,8 @@ const complete = (state: GameState, id: ChallengeId): GameState => {
 };
 
 export const goalAdded = (s: GameState) => s.contributions.reduce((sum, c) => sum + c.amount, 0);
+/* Money moved out of the current account to savings in this demo month. */
+export const movedToSavings = (s: GameState) => s.contributions.filter((c) => c.source === "bank").reduce((sum, c) => sum + c.amount, 0);
 
 const reducer = (state: GameState, action: Action): GameState => {
   switch (action.type) {
@@ -142,16 +156,44 @@ const reducer = (state: GameState, action: Action): GameState => {
       const created = !state.goal;
       return { ...state, goal: action.goal, event: created ? { key: now(), kind: "goal-created" } : state.event };
     }
+    case "addGoal":
+      // A new goal goes on top of the stack and becomes the active one
+      if (!state.goal) return { ...state, goal: action.goal, event: { key: now(), kind: "goal-created" } };
+      return { ...state, goal: action.goal, moreGoals: [state.goal, ...state.moreGoals], event: { key: now(), kind: "goal-created" } };
+    case "cycleGoal": {
+      if (!state.goal || !state.moreGoals.length) return state;
+      const all = [state.goal, ...state.moreGoals];
+      const next = action.dir === 1 ? [...all.slice(1), all[0]] : [all[all.length - 1], ...all.slice(0, -1)];
+      return { ...state, goal: next[0], moreGoals: next.slice(1) };
+    }
     case "addToGoal": {
       if (!state.goal || action.amount <= 0) return state;
       const next: GameState = {
         ...state,
         goal: { ...state.goal, saved: Math.round((state.goal.saved + action.amount) * 100) / 100 },
-        contributions: [{ id: now(), amount: action.amount, day: state.day }, ...state.contributions],
+        contributions: [{ id: now(), amount: action.amount, day: state.day, source: "you", goal: state.goal.name }, ...state.contributions],
         event: { key: now(), kind: "goal-add", amount: action.amount },
       };
       return goalAdded(next) >= GOAL_ADD_TARGET ? complete(next, "goal-add") : next;
     }
+    case "linkSavings":
+      // The account already holds what the student has set aside for the goal
+      return { ...state, savings: { linked: true, balance: state.goal?.saved ?? 0 } };
+    case "transferToSavings": {
+      // Confirmed by the student in their bank: current account → their own savings account
+      if (!state.goal || !state.savings.linked || action.amount <= 0) return state;
+      const amount = Math.round(action.amount * 100) / 100;
+      const next: GameState = {
+        ...state,
+        goal: { ...state.goal, saved: Math.round((state.goal.saved + amount) * 100) / 100 },
+        savings: { ...state.savings, balance: Math.round((state.savings.balance + amount) * 100) / 100 },
+        contributions: [{ id: now(), amount, day: state.day, source: "bank", goal: state.goal.name }, ...state.contributions],
+        event: { key: now(), kind: "transfer", amount },
+      };
+      return goalAdded(next) >= GOAL_ADD_TARGET ? complete(next, "goal-add") : next;
+    }
+    case "boughtAnyway":
+      return { ...state, event: { key: now(), kind: "bought-anyway", what: action.what } };
     case "checkBudget": {
       if (state.checks.lastDay === state.day) return state;
       const days = state.checks.lastDay === state.day - 1 ? state.checks.days + 1 : 1;
@@ -192,7 +234,12 @@ type Ctx = {
   resetBudget: () => void;
   confirmBudget: () => void;
   saveGoal: (goal: Goal) => void;
+  addGoal: (goal: Goal) => void;
+  cycleGoal: (dir: 1 | -1) => void;
   addToGoal: (amount: number) => void;
+  linkSavings: () => void;
+  transferToSavings: (amount: number) => void;
+  boughtAnyway: (what: string) => void;
   checkBudget: () => void;
   nextDay: () => void;
   monthEnd: () => void;
@@ -237,7 +284,12 @@ export const GameProvider = ({ children, persistKey, initial }: { children: Reac
       resetBudget: () => dispatch({ type: "resetBudget" }),
       confirmBudget: () => dispatch({ type: "confirmBudget" }),
       saveGoal: (goal: Goal) => dispatch({ type: "saveGoal", goal }),
+      addGoal: (goal: Goal) => dispatch({ type: "addGoal", goal }),
+      cycleGoal: (dir: 1 | -1) => dispatch({ type: "cycleGoal", dir }),
       addToGoal: (amount: number) => dispatch({ type: "addToGoal", amount }),
+      linkSavings: () => dispatch({ type: "linkSavings" }),
+      transferToSavings: (amount: number) => dispatch({ type: "transferToSavings", amount }),
+      boughtAnyway: (what: string) => dispatch({ type: "boughtAnyway", what }),
       checkBudget: () => dispatch({ type: "checkBudget" }),
       nextDay: () => dispatch({ type: "nextDay" }),
       monthEnd: () => dispatch({ type: "monthEnd" }),

@@ -1,37 +1,55 @@
-import { ChevronRight, Target } from "lucide-react";
-import BrokieMascot from "../../brand/BrokieMascot";
+import { ChevronRight, CircleHelp, PiggyBank, Sparkles, Target } from "lucide-react";
 import { ProgressBar } from "../GameUI";
 import ChallengeCard from "./ChallengeCard";
 import { featuredChallenge } from "./challengeModel";
-import { homeBanner } from "@/data/appNotifications";
 import { sumBudget } from "@/data/students";
-import { useGame, useStudent } from "@/hooks/use-game";
-import { useTone } from "@/hooks/use-tone";
+import { movedToSavings, useGame, useStudent } from "@/hooks/use-game";
 import type { PhoneTab } from "./tabs";
+import { useOpenSheet } from "./sheets";
 
 const eur = (n: number) => `€${Number.isInteger(n) ? n : n.toFixed(2)}`;
 
 /* Overview of the month, the active goal and the challenge Brokie suggests next. */
 const HomeScreen = ({ onNavigate }: { onNavigate: (tab: PhoneTab) => void }) => {
+  const open = useOpenSheet();
   const { state } = useGame();
-  const { tone } = useTone();
   const m = useStudent();
   const income = m.income;
   const spent = m.current.spent;
-  const left = Math.round((income - spent) * 100) / 100;
+  const moved = movedToSavings(state);
+  const left = Math.round((income - spent - moved) * 100) / 100;
   const planned = sumBudget(state.budget);
-  const projected = m.projected(state.budget);
-  const insight = homeBanner(state, tone);
+  const projected = m.projected(state.budget) - moved;
   const goal = state.goal;
   const featured = featuredChallenge(state);
 
   return (
     <div className="px-5 pb-4 space-y-3">
-      {/* Brokie's take */}
-      <div className="flex items-center gap-3">
-        <BrokieMascot mood={insight.mood} size={44} className="shrink-0" title="" />
-        <p className="text-[13.5px] font-extrabold leading-snug">{insight.text}</p>
+      {/* quick actions */}
+      <div className="grid grid-cols-2 gap-2">
+        <button type="button" onClick={() => open({ kind: "afford" })} className="flex items-center gap-2 rounded-2xl bg-white/[0.06] border border-white/10 hover:bg-white/[0.09] px-3 py-2.5 text-left">
+          <CircleHelp className="w-4 h-4 shrink-0 text-accent" aria-hidden="true" />
+          <span className="text-[12.5px] font-black leading-tight">Can I afford it?</span>
+        </button>
+        <button type="button" onClick={() => (state.goal ? open({ kind: "savings" }) : onNavigate("goals"))} className="flex items-center gap-2 rounded-2xl bg-white/[0.06] border border-white/10 hover:bg-white/[0.09] px-3 py-2.5 text-left">
+          <PiggyBank className="w-4 h-4 shrink-0 text-accent" aria-hidden="true" />
+          <span className="text-[12.5px] font-black leading-tight">Move to savings</span>
+        </button>
       </div>
+
+      {/* October, wrapped */}
+      <button
+        type="button"
+        onClick={() => open({ kind: "wrapped" })}
+        className="w-full flex items-center gap-3 rounded-2xl p-3.5 text-left bg-[linear-gradient(120deg,hsl(262_83%_55%),hsl(330_75%_50%))] hover:brightness-110 transition"
+      >
+        <Sparkles className="w-5 h-5 shrink-0" aria-hidden="true" />
+        <span className="flex-1">
+          <span className="block text-[14px] font-black leading-tight">Your {m.history.name}, wrapped</span>
+          <span className="block text-[11.5px] font-bold text-white/80">Your month in money, story style</span>
+        </span>
+        <ChevronRight className="w-4 h-4" aria-hidden="true" />
+      </button>
 
       {/* month overview */}
       <button type="button" onClick={() => onNavigate("spending")} className="w-full text-left rounded-2xl bg-white/[0.06] border border-white/10 p-3.5 hover:bg-white/[0.09] transition-colors">

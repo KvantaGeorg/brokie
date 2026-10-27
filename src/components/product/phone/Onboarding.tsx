@@ -141,8 +141,8 @@ const BanksStep = () => {
   return (
     <div className="flex flex-col flex-1">
       <h2 className="text-[22px] font-black leading-tight">Connect your bank</h2>
-      <p className="text-[12.5px] font-bold text-white/55 mt-1 flex items-center gap-1.5">
-        <Lock className="w-3.5 h-3.5" aria-hidden="true" /> Read-only. Brokie never moves money.
+      <p className="text-[12.5px] font-bold text-white/55 mt-1 flex items-start gap-1.5">
+        <Lock className="w-3.5 h-3.5 shrink-0" aria-hidden="true" /> Brokie never holds your money. Every transfer is confirmed by you in your bank.
       </p>
       <ul className="mt-4 divide-y divide-white/[0.07]">
         {BANKS.map((b) => {

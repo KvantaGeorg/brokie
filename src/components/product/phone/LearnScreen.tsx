@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { Check, ChevronLeft, ChevronRight, Clock, GraduationCap, X } from "lucide-react";
+import { Check, ChevronLeft, GraduationCap, Lock, Star, X } from "lucide-react";
 import BrokieMascot from "../../brand/BrokieMascot";
 import { ProgressBar } from "../GameUI";
 import { LESSON_XP, lessonsFor, type Lesson } from "@/data/lessons";
@@ -112,60 +112,116 @@ const LessonView = ({ lesson, onBack }: { lesson: Lesson; onBack: () => void }) 
   );
 };
 
-/* Learn tab: bite-size money lessons. Each finished lesson pays XP once (more for a right answer). */
+/* Units on the learning map. Only the first one exists in the demo; the rest show where the course goes. */
+const LOCKED_UNITS = [
+  { title: "Saving and goals", lessons: 5 },
+  { title: "Banks, cards and payments", lessons: 6 },
+  { title: "Credit and loans", lessons: 5 },
+  { title: "Investing basics", lessons: 6 },
+];
+
+/* Zigzag offsets for the path, like a winding trail */
+const OFFSETS = [0, 46, 70, 46, 0, -46, -70, -46];
+
+/* Learn tab: a Duolingo-style map. Unit 1, Money basics, is open; finishing a lesson pays XP once. */
 const LearnScreen = () => {
   const { state } = useGame();
   const m = useStudent();
+  const still = useReducedMotion() ?? false;
   const lessons = lessonsFor(m, state.goal);
   const [open, setOpen] = useState<Lesson["id"] | null>(null);
   const done = lessons.filter((l) => state.lessons[l.id] != null).length;
+  const current = lessons.findIndex((l) => state.lessons[l.id] == null);
   const lesson = lessons.find((l) => l.id === open);
 
   if (lesson) return <div className="px-5 pb-4"><LessonView lesson={lesson} onBack={() => setOpen(null)} /></div>;
 
   return (
-    <div className="px-5 pb-4">
-      <div className="flex items-center gap-3">
-        <span className="w-11 h-11 shrink-0 rounded-xl bg-primary/30 flex items-center justify-center text-primary-glow">
+    <div className="px-5 pb-6">
+      {/* unit 1 banner */}
+      <div className="rounded-2xl bg-[linear-gradient(120deg,hsl(262_83%_55%),hsl(262_70%_42%))] p-3.5 flex items-center gap-3">
+        <span className="w-10 h-10 shrink-0 rounded-xl bg-white/15 flex items-center justify-center">
           <GraduationCap className="w-5 h-5" strokeWidth={2.5} aria-hidden="true" />
         </span>
-        <div>
-          <h2 className="text-[19px] font-black leading-tight">Money basics</h2>
-          <p className="text-[12px] font-bold text-white/55">Two minutes each, with your own numbers.</p>
+        <div className="flex-1 min-w-0">
+          <p className="text-[11px] font-black uppercase tracking-wide text-white/70">Unit 1</p>
+          <h2 className="text-[17px] font-black leading-tight">Money basics</h2>
         </div>
+        <span className="text-[12px] font-black tabular">
+          {done}/{lessons.length}
+        </span>
       </div>
-      <ProgressBar value={done} max={lessons.length} label="Lessons finished" className="h-2 mt-4" />
-      <p className="text-[11px] font-bold text-white/50 mt-1.5 tabular">
-        {done} of {lessons.length} finished · +{LESSON_XP} XP for each right answer
-      </p>
+      <ProgressBar value={done} max={lessons.length} label="Money basics lessons finished" className="h-2 mt-3" />
+      <p className="text-[11px] font-bold text-white/50 mt-1.5">+{LESSON_XP} XP for each right answer</p>
 
-      <ul className="mt-4 space-y-2">
+      {/* the path */}
+      <ol className="relative mt-12 flex flex-col items-center gap-10" aria-label="Money basics lessons">
         {lessons.map((l, i) => {
           const result = state.lessons[l.id];
           const finished = result != null;
+          const isCurrent = i === current;
+          const dx = OFFSETS[i % OFFSETS.length];
           return (
-            <li key={l.id}>
+            <li key={l.id} className="relative flex flex-col items-center" style={{ transform: `translateX(${dx}px)` }}>
+              {isCurrent && (
+                <motion.span
+                  animate={still ? {} : { y: [0, -4, 0] }}
+                  transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
+                  className="absolute -top-7 whitespace-nowrap rounded-lg bg-white text-[hsl(258_42%_12%)] px-2 py-0.5 text-[11px] font-black"
+                  aria-hidden="true"
+                >
+                  {done ? "Next" : "Start"}
+                </motion.span>
+              )}
               <button
                 type="button"
                 onClick={() => setOpen(l.id)}
-                className={`w-full flex items-center gap-3 rounded-2xl border p-3 text-left transition-colors ${finished ? "bg-chart-2/10 border-chart-2/30" : "bg-white/[0.06] border-white/10 hover:bg-white/[0.09]"}`}
+                aria-label={`Lesson ${i + 1}: ${l.title}${finished ? ", finished" : ""}`}
+                className={`relative w-16 h-16 rounded-full flex items-center justify-center transition-transform active:translate-y-1 ${
+                  finished
+                    ? "bg-accent text-accent-foreground shadow-[0_5px_0_hsl(var(--accent-deep))]"
+                    : isCurrent
+                      ? "bg-primary text-white shadow-[0_5px_0_hsl(var(--primary-deep))] ring-4 ring-primary/30"
+                      : "bg-[hsl(258_30%_24%)] text-white/80 shadow-[0_5px_0_hsl(258_30%_15%)]"
+                }`}
               >
-                <span className={`w-8 h-8 shrink-0 rounded-lg flex items-center justify-center text-[12px] font-black ${finished ? "bg-chart-2 text-white" : "bg-white/10"}`}>
-                  {finished ? <Check className="w-4 h-4" strokeWidth={3.5} aria-label="Finished" /> : i + 1}
-                </span>
-                <span className="flex-1 min-w-0">
-                  <span className="block text-[13px] font-extrabold leading-snug">{l.title}</span>
-                  <span className="flex items-center gap-1 text-[11px] font-bold text-white/45">
-                    <Clock className="w-3 h-3" aria-hidden="true" /> {l.minutes} min{finished && ` · ${result ? "answered right" : "done"}`}
-                  </span>
-                </span>
-                <ChevronRight className="w-4 h-4 text-white/35 shrink-0" aria-hidden="true" />
+                {finished ? <Check className="w-7 h-7" strokeWidth={3.5} aria-hidden="true" /> : <Star className="w-7 h-7" strokeWidth={2.5} fill={isCurrent ? "currentColor" : "none"} aria-hidden="true" />}
               </button>
+              <span className="mt-2 max-w-[120px] text-center text-[11px] font-extrabold leading-tight text-white/75">{l.title}</span>
             </li>
           );
         })}
+      </ol>
+
+      {/* mascot at the end of the unit */}
+      <div className="flex justify-center mt-4">
+        <BrokieMascot mood={done === lessons.length ? "proud" : "happy"} size={56} title="" />
+      </div>
+
+      {/* what comes next: locked units */}
+      <ul className="mt-6 space-y-3">
+        {LOCKED_UNITS.map((u, k) => (
+          <li key={u.title} className="rounded-2xl border border-white/10 bg-white/[0.03] p-3.5">
+            <div className="flex items-center gap-3">
+              <span className="w-10 h-10 shrink-0 rounded-xl bg-white/[0.06] flex items-center justify-center text-white/40">
+                <Lock className="w-4 h-4" aria-hidden="true" />
+              </span>
+              <div className="flex-1 min-w-0">
+                <p className="text-[11px] font-black uppercase tracking-wide text-white/40">Unit {k + 2}</p>
+                <p className="text-[14.5px] font-black text-white/60 leading-tight">{u.title}</p>
+              </div>
+              <span className="text-[11px] font-bold text-white/40">{u.lessons} lessons</span>
+            </div>
+            <div className="flex gap-2 mt-3" aria-hidden="true">
+              {Array.from({ length: u.lessons }).map((_, j) => (
+                <span key={j} className="w-7 h-7 rounded-full bg-white/[0.06]" />
+              ))}
+            </div>
+          </li>
+        ))}
       </ul>
-      <p className="text-[10.5px] font-bold text-white/40 mt-3">General money education, not financial advice.</p>
+      <p className="text-[11px] font-bold text-white/45 mt-3 text-center">Finish Money basics to unlock Unit 2. More units coming soon.</p>
+      <p className="text-[10.5px] font-bold text-white/35 mt-2 text-center">General money education, not financial advice.</p>
     </div>
   );
 };

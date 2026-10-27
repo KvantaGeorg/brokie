@@ -47,7 +47,7 @@ const GoalForm = ({ initial, submitLabel, onSubmit, onSecondary, secondaryLabel 
           {error}
         </p>
       )}
-      <p className="text-[11px] font-bold text-white/45">Tracked virtually. Brokie never holds, moves or sets aside money for you.</p>
+      <p className="text-[11px] font-bold text-white/45">Brokie never holds your money. Every transfer is confirmed by you in your bank.</p>
       <div className="space-y-2 pt-1">
         <button type="submit" className="w-full h-11 rounded-xl bg-accent text-accent-foreground text-[14px] font-black shadow-[0_3px_0_hsl(var(--accent-deep))] active:translate-y-0.5 active:shadow-none transition-transform">
           {submitLabel}
