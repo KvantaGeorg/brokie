@@ -1,17 +1,15 @@
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown, Lock, Minus, Plus } from "lucide-react";
-import { CATEGORY_ICONS } from "./icons";
-import { CATEGORIES, type SpendCategory } from "@/data/transactions";
-import { FIXED, FLEXIBLE, lastMonth, projectedBalance, remaining, sumBudget, thisMonth } from "@/data/budget";
-import { MONTH } from "@/data/november";
-import { useGame } from "@/hooks/use-game";
+import { STUDENT_ICONS } from "./icons";
+import { catMeta, sumBudget, type Cat } from "@/data/students";
+import { useGame, useStudent } from "@/hooks/use-game";
 
 const eur = (n: number) => `€${Number.isInteger(n) ? n : n.toFixed(2)}`;
-const day = (date: string) => new Date(date).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+const day = (d: number) => `${d} Nov`;
 const STEP = 5;
 
-const Stepper = ({ cat, label }: { cat: SpendCategory; label: string }) => {
+const Stepper = ({ cat, label }: { cat: Cat; label: string }) => {
   const { state, setLimit } = useGame();
   const value = state.budget[cat];
   return (
@@ -46,14 +44,15 @@ const barColor = (used: number, limit: number) => (used > limit ? "hsl(var(--des
 /* Summary of the plan: what's planned and what that leaves at the end of the month. */
 export const BudgetSummary = ({ compareLastMonth = false }: { compareLastMonth?: boolean }) => {
   const { state } = useGame();
+  const m = useStudent();
   const planned = sumBudget(state.budget);
-  const left = projectedBalance(lastMonth.income, state.budget);
+  const left = m.projected(state.budget);
   return (
     <div className="rounded-2xl bg-white/[0.06] border border-white/10 p-3.5">
       <div className="grid grid-cols-3 gap-2 text-center">
         <div>
           <p className="text-[10.5px] font-extrabold text-white/50">Income</p>
-          <p className="text-[15px] font-black tabular">{eur(lastMonth.income)}</p>
+          <p className="text-[15px] font-black tabular">{eur(Math.round(m.income))}</p>
         </div>
         <div>
           <p className="text-[10.5px] font-extrabold text-white/50">Planned</p>
@@ -69,7 +68,7 @@ export const BudgetSummary = ({ compareLastMonth = false }: { compareLastMonth?:
       </div>
       {compareLastMonth && (
         <p className="text-[11px] font-bold text-white/50 mt-2.5 text-center">
-          October: {eur(lastMonth.spent)} spent, {eur(Math.round((lastMonth.income - lastMonth.spent) * 100) / 100)} left
+          October: {eur(m.history.spent)} spent, {m.income >= m.history.spent ? `${eur(Math.round((m.income - m.history.spent) * 100) / 100)} left` : `${eur(Math.round((m.history.spent - m.income) * 100) / 100)} more than came in`}
         </p>
       )}
     </div>
@@ -79,17 +78,17 @@ export const BudgetSummary = ({ compareLastMonth = false }: { compareLastMonth?:
 /* Category limits. "plan" compares with last month while choosing limits; "track" shows this month's actual vs plan. */
 const BudgetEditor = ({ mode, editing = false }: { mode: "plan" | "track"; editing?: boolean }) => {
   const { state } = useGame();
-  const [open, setOpen] = useState<SpendCategory | null>(null);
-  const meta = (id: SpendCategory) => CATEGORIES.find((c) => c.id === id)!;
+  const m = useStudent();
+  const [open, setOpen] = useState<Cat | null>(null);
 
   // A render function, not a component: keeps the limit inputs mounted (and focused) while typing
-  const renderRow = (id: SpendCategory) => {
-    const c = meta(id);
-    const Icon = CATEGORY_ICONS[id];
-    const fixed = FIXED.includes(id);
+  const renderRow = (id: Cat) => {
+    const c = catMeta(id);
+    const Icon = STUDENT_ICONS[id];
+    const fixed = m.fixed.includes(id);
     const limit = state.budget[id];
-    const used = thisMonth.byCategory(id);
-    const left = remaining(state.budget, id);
+    const used = m.current.byCategory(id);
+    const left = m.remaining(state.budget, id);
     const editable = !fixed && (mode === "plan" || editing);
     const expanded = mode === "track" && !editing && open === id;
 
@@ -102,7 +101,7 @@ const BudgetEditor = ({ mode, editing = false }: { mode: "plan" | "track"; editi
           {mode === "plan" && (
             <>
               <span className="block text-[12.5px] font-extrabold leading-tight">{c.label}</span>
-              <span className="block text-[10.5px] font-bold text-white/45 tabular">October {eur(Math.round(lastMonth.byCategory(id)))}</span>
+              <span className="block text-[10.5px] font-bold text-white/45 tabular">October {eur(Math.round(m.history.byCategory(id)))}</span>
             </>
           )}
           <span className={`items-baseline justify-between gap-2 ${mode === "plan" ? "hidden" : "flex"}`}>
@@ -145,15 +144,15 @@ const BudgetEditor = ({ mode, editing = false }: { mode: "plan" | "track"; editi
         <AnimatePresence initial={false}>
           {expanded && (
             <motion.ul initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden pl-10">
-              {thisMonth.transactions(id).map((t) => (
+              {m.current.transactions(id).map((t) => (
                 <li key={t.id} className="flex justify-between gap-2 pt-1.5 text-[11.5px] font-bold">
                   <span className="truncate text-white/75">
-                    {t.merchant} <span className="text-white/40">· {day(t.date)}</span>
+                    {t.label} <span className="text-white/40">· {day(t.day)}</span>
                   </span>
                   <span className="tabular shrink-0">−{eur(Math.abs(t.amount))}</span>
                 </li>
               ))}
-              {!thisMonth.transactions(id).length && <li className="pt-1.5 text-[11.5px] font-bold text-white/45">Nothing yet this month.</li>}
+              {!m.current.transactions(id).length && <li className="pt-1.5 text-[11.5px] font-bold text-white/45">Nothing yet this month.</li>}
             </motion.ul>
           )}
         </AnimatePresence>
@@ -163,12 +162,16 @@ const BudgetEditor = ({ mode, editing = false }: { mode: "plan" | "track"; editi
 
   return (
     <div>
-      <h3 className="text-[11px] font-extrabold text-white/50 mt-4">Fixed</h3>
-      <ul>{FIXED.map(renderRow)}</ul>
-      <h3 className="text-[11px] font-extrabold text-white/50 mt-2">
-        Flexible {mode === "track" && <span className="text-white/35">· day {MONTH.today} of {MONTH.days}</span>}
+      {m.fixed.length > 0 && (
+        <>
+          <h3 className="text-[11px] font-extrabold text-white/50 mt-4">Fixed</h3>
+          <ul>{m.fixed.map(renderRow)}</ul>
+        </>
+      )}
+      <h3 className={`text-[11px] font-extrabold text-white/50 ${m.fixed.length ? "mt-2" : "mt-4"}`}>
+        Flexible {mode === "track" && <span className="text-white/35">· day {m.current.today} of {m.current.days}</span>}
       </h3>
-      <ul className="divide-y divide-white/[0.06]">{FLEXIBLE.map(renderRow)}</ul>
+      <ul className="divide-y divide-white/[0.06]">{m.flexible.map(renderRow)}</ul>
     </div>
   );
 };

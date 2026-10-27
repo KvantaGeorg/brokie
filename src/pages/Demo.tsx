@@ -32,7 +32,6 @@ const Demo = () => {
           <h1 className="sr-only">{SITE.name} app demo</h1>
           <PhoneMockup />
           <ToneToggle />
-          <p className="text-[13px] font-semibold text-muted-foreground text-center max-w-sm">All financial data and bank connections in this demo are simulated.</p>
         </main>
       </div>
     </ToneProvider>

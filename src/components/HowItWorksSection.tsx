@@ -150,7 +150,7 @@ const HowItWorksSection = () => {
   };
 
   return (
-    <section id="how-it-works" className="section">
+    <section id="how-it-works" className="section section-alt">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <SectionHeader title="Four steps to better money habits." desc="No complicated spreadsheets. No finance lectures. Just your money, made easier to understand." />
 

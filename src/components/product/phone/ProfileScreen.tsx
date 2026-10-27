@@ -1,23 +1,29 @@
-import { Bike, CalendarCheck, Flame, PiggyBank, RotateCcw, Target, Trophy, Wallet, type LucideIcon } from "lucide-react";
+import { BookOpen, CalendarCheck, Flame, GraduationCap, PiggyBank, RotateCcw, Target, TrendingDown, Trophy, Users, Wallet, type LucideIcon } from "lucide-react";
 import BrokieMascot from "../../brand/BrokieMascot";
 import { ProgressBar } from "../GameUI";
 import { FRIENDS, PROFILE, levelTitle, levelXp } from "@/data/challenges";
-import { useGame, type GameState } from "@/hooks/use-game";
+import { catMeta, type Cat } from "@/data/students";
+import { useGame, useStudent, type GameState } from "@/hooks/use-game";
+
+const FOCUS_SHORT: Partial<Record<Cat, string>> = { eatingOut: "Eating-out", fun: "Fun budget", shopping: "Shopping" };
 
 /* Achievements unlock from what the user actually did in this session. */
-const achievements = (s: GameState): { id: string; icon: LucideIcon; title: string; unlocked: boolean }[] => [
+const achievements = (s: GameState, focusLabel: string): { id: string; icon: LucideIcon; title: string; unlocked: boolean }[] => [
   { id: "budget", icon: Wallet, title: "First budget", unlocked: s.budgetConfirmed },
   { id: "goal", icon: Target, title: "Goal setter", unlocked: !!s.goal },
   { id: "saver", icon: PiggyBank, title: "Halfway there", unlocked: !!s.goal && s.goal.saved >= s.goal.target / 2 },
   { id: "checker", icon: CalendarCheck, title: "Budget habit", unlocked: s.challenges["check-budget"] === "done" },
   { id: "first", icon: Trophy, title: "First challenge", unlocked: Object.values(s.challenges).includes("done") },
-  { id: "delivery", icon: Bike, title: "Delivery tamer", unlocked: s.challenges["delivery-budget"] === "done" },
+  { id: "focus", icon: TrendingDown, title: `${focusLabel} tamer`, unlocked: s.challenges["focus-budget"] === "done" },
+  { id: "learner", icon: GraduationCap, title: "Money learner", unlocked: Object.keys(s.lessons).length >= 3 },
+  { id: "scholar", icon: BookOpen, title: "All lessons", unlocked: Object.keys(s.lessons).length >= 6 },
 ];
 
 /* Level, streaks, achievements and the weekly friend league. */
 const ProfileScreen = () => {
   const p = PROFILE;
-  const { state, restart } = useGame();
+  const { state, restart, goTo } = useGame();
+  const { student, focus } = useStudent();
   const need = levelXp(state.level);
   const league = [...FRIENDS.map((f) => ({ name: f.name, xp: f.xp })), { name: "You", xp: state.weekXp }].sort((a, b) => b.xp - a.xp);
   const youRank = league.findIndex((f) => f.name === "You");
@@ -35,7 +41,10 @@ const ProfileScreen = () => {
           <BrokieMascot mood="happy" size={42} title="" />
         </span>
         <div className="min-w-0">
-          <h2 className="text-[19px] font-black leading-tight">{p.name}</h2>
+          <h2 className="text-[19px] font-black leading-tight">{student.name}</h2>
+          <p className="text-[11.5px] font-bold text-white/50 truncate">
+            {student.age} · {student.uniShort}, year {student.studyYear} · {student.city}
+          </p>
           <p className="text-[12px] font-bold text-white/50">
             Level {state.level} · {levelTitle(state.level)}
           </p>
@@ -60,8 +69,8 @@ const ProfileScreen = () => {
       </ul>
 
       <h3 className="text-[11px] font-extrabold text-white/50 mt-5 mb-2">Achievements</h3>
-      <ul className="grid grid-cols-3 gap-2">
-        {achievements(state).map(({ id, icon: Icon, title, unlocked }) => (
+      <ul className="grid grid-cols-4 gap-1.5">
+        {achievements(state, FOCUS_SHORT[focus] ?? catMeta(focus).label).map(({ id, icon: Icon, title, unlocked }) => (
           <li key={id} className={`rounded-xl px-1.5 py-2.5 text-center ${unlocked ? "bg-accent/15" : "bg-white/[0.04]"}`}>
             <Icon className={`w-4 h-4 mx-auto ${unlocked ? "text-accent" : "text-white/30"}`} strokeWidth={2.5} aria-hidden="true" />
             <span className={`block text-[10.5px] font-extrabold mt-1.5 leading-tight ${unlocked ? "" : "text-white/40"}`}>{title}</span>
@@ -87,9 +96,14 @@ const ProfileScreen = () => {
         })}
       </ol>
 
-      <button type="button" onClick={restart} className="mt-5 mx-auto flex items-center gap-1.5 rounded-lg px-2 py-1 text-[11px] font-extrabold text-white/45 hover:text-white">
-        <RotateCcw className="w-3 h-3" aria-hidden="true" /> Restart demo from sign-up
-      </button>
+      <div className="mt-5 flex flex-col items-center gap-1">
+        <button type="button" onClick={() => goTo("student")} className="flex items-center gap-1.5 h-9 px-3.5 rounded-xl bg-white/10 hover:bg-white/15 text-[12px] font-black">
+          <Users className="w-3.5 h-3.5" aria-hidden="true" /> Switch student
+        </button>
+        <button type="button" onClick={restart} className="flex items-center gap-1.5 rounded-lg px-2 py-1 text-[11px] font-extrabold text-white/45 hover:text-white">
+          <RotateCcw className="w-3 h-3" aria-hidden="true" /> Restart demo from sign-up
+        </button>
+      </div>
     </div>
   );
 };

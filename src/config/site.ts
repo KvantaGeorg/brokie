@@ -29,5 +29,5 @@ export const SITE = {
 
   demoPath: "/demo",
 
-  footerNote: "Student project for the FinTech Ecosystem and Management course. All financial data and bank connections in the demo are simulated.",
+  footerNote: "Student project for the FinTech Ecosystem and Management course. The demo runs on the Brokie student dataset; bank connections are not real.",
 };

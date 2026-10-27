@@ -73,7 +73,7 @@ const Preview = () => {
 };
 
 const GamificationSection = () => (
-  <section id="gamification" className="section section-alt">
+  <section id="gamification" className="section">
     <div className="container mx-auto px-4 sm:px-6 lg:px-8">
       <SectionHeader label="Gamification" title="Better habits. Bigger wins." desc="Turn everyday financial decisions into small challenges, build your streak, and level up along the way." />
       <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">

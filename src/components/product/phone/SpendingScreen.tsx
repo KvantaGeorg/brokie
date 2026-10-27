@@ -3,10 +3,9 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Check, ChevronRight, Pencil } from "lucide-react";
 import BudgetEditor, { BudgetSummary } from "./BudgetEditor";
 import CategoryDetail from "./CategoryDetail";
-import { CATEGORY_ICONS } from "./icons";
-import { spendingByCategory, totalIncome, totalSpent, type SpendCategory } from "@/data/transactions";
-import { MONTH } from "@/data/november";
-import { useGame } from "@/hooks/use-game";
+import { STUDENT_ICONS } from "./icons";
+import { catMeta, type Cat } from "@/data/students";
+import { useGame, useStudent } from "@/hooks/use-game";
 
 /* This month: the budget, actual vs plan, editable. Opening it counts as today's budget check. */
 const BudgetView = ({ live }: { live: boolean }) => {
@@ -40,9 +39,18 @@ const BudgetView = ({ live }: { live: boolean }) => {
 /* Last month: where the money went, each category opens its payments and Brokie's take. */
 const OctoberView = () => {
   const still = useReducedMotion() ?? false;
-  const cats = useMemo(() => [...spendingByCategory()].sort((a, b) => b.total - a.total), []);
-  const total = totalSpent();
-  const [open, setOpen] = useState<SpendCategory | null>(null);
+  const m = useStudent();
+  const cats = useMemo(
+    () =>
+      m.categories
+        .map((id) => ({ ...catMeta(id), total: m.history.byCategory(id) }))
+        .filter((c) => c.total > 0)
+        .sort((a, b) => b.total - a.total),
+    [m],
+  );
+  const total = m.history.spent;
+  const left = m.income - total;
+  const [open, setOpen] = useState<Cat | null>(null);
 
   let acc = 0;
   const gradient = cats
@@ -71,14 +79,14 @@ const OctoberView = () => {
         <div>
           <p className="text-[11px] font-extrabold text-white/50">Spent in October</p>
           <p className="text-[24px] font-black tabular leading-tight">€{total.toFixed(2)}</p>
-          <p className="text-[11px] font-bold text-white/50 tabular">
-            of €{totalIncome().toFixed(0)} · €{(totalIncome() - total).toFixed(2)} left
+          <p className={`text-[11px] font-bold tabular ${left >= 0 ? "text-white/50" : "text-destructive"}`}>
+            of €{m.income.toFixed(0)} · {left >= 0 ? `€${left.toFixed(2)} left` : `€${(-left).toFixed(2)} over`}
           </p>
         </div>
       </div>
       <ul className="mt-4 space-y-0.5">
         {cats.map((c) => {
-          const Icon = CATEGORY_ICONS[c.id];
+          const Icon = STUDENT_ICONS[c.id];
           return (
             <li key={c.id}>
               <button type="button" onClick={() => setOpen(c.id)} className="w-full flex items-center gap-3 rounded-xl px-2 py-1.5 text-left hover:bg-white/[0.05]">
@@ -101,8 +109,9 @@ const OctoberView = () => {
 const SpendingScreen = ({ live = true }: { live?: boolean }) => {
   const [view, setView] = useState<"budget" | "october">("budget");
   const still = useReducedMotion() ?? false;
+  const m = useStudent();
   const options = [
-    { id: "budget" as const, label: `${MONTH.name} budget` },
+    { id: "budget" as const, label: `${m.current.name} budget` },
     { id: "october" as const, label: "October" },
   ];
 

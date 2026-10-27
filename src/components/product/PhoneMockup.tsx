@@ -8,6 +8,7 @@ import HomeScreen from "./phone/HomeScreen";
 import SpendingScreen from "./phone/SpendingScreen";
 import GoalsScreen from "./phone/GoalsScreen";
 import ProfileScreen from "./phone/ProfileScreen";
+import LearnScreen from "./phone/LearnScreen";
 import LevelUpOverlay from "./phone/LevelUpOverlay";
 import { PHONE_TABS, type PhoneTab } from "./phone/tabs";
 import { contextualBanners, eventBanner } from "@/data/appNotifications";
@@ -56,7 +57,7 @@ const useBanners = () => {
   return inApp ? banner : null;
 };
 
-/* Interactive app built in HTML/CSS: onboarding first, then four tabs sharing one state. */
+/* Interactive app built in HTML/CSS: onboarding first, then five tabs sharing one state. */
 const PhoneScreen = () => {
   const { state: game } = useGame();
   const still = useReducedMotion() ?? false;
@@ -138,6 +139,7 @@ const PhoneScreen = () => {
                 {tab === "home" && <HomeScreen onNavigate={openTab} />}
                 {tab === "spending" && <SpendingScreen />}
                 {tab === "goals" && <GoalsScreen onNavigate={openTab} />}
+                {tab === "learn" && <LearnScreen />}
                 {tab === "profile" && <ProfileScreen />}
               </motion.div>
             </AnimatePresence>
@@ -161,7 +163,7 @@ const PhoneScreen = () => {
                   tabIndex={active ? 0 : -1}
                   onClick={() => openTab(id)}
                   onKeyDown={(e) => onTabKey(e, idx)}
-                  className={`flex flex-col items-center gap-1 rounded-xl px-2 py-1 text-[10px] font-extrabold transition-colors active:scale-95 ${
+                  className={`flex flex-col items-center gap-1 rounded-xl px-1.5 py-1 text-[10px] font-extrabold transition-colors active:scale-95 ${
                     active ? "text-accent" : "text-white/55 hover:text-white"
                   }`}
                 >
@@ -179,7 +181,7 @@ const PhoneScreen = () => {
 
 /* The demo phone keeps its progress for the browser session, so leaving /demo or reloading doesn't lose it. */
 const PhoneMockup = () => (
-  <GameProvider persistKey="brokie-demo-v2">
+  <GameProvider persistKey="brokie-demo-v3">
     <PhoneScreen />
   </GameProvider>
 );

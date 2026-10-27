@@ -3,10 +3,9 @@ import BrokieMascot from "../../brand/BrokieMascot";
 import { ProgressBar } from "../GameUI";
 import ChallengeCard from "./ChallengeCard";
 import { featuredChallenge } from "./challengeModel";
-import { contextualBanners } from "@/data/appNotifications";
-import { lastMonth, projectedBalance, sumBudget, thisMonth } from "@/data/budget";
-import { MONTH } from "@/data/november";
-import { useGame } from "@/hooks/use-game";
+import { homeBanner } from "@/data/appNotifications";
+import { sumBudget } from "@/data/students";
+import { useGame, useStudent } from "@/hooks/use-game";
 import { useTone } from "@/hooks/use-tone";
 import type { PhoneTab } from "./tabs";
 
@@ -16,12 +15,13 @@ const eur = (n: number) => `€${Number.isInteger(n) ? n : n.toFixed(2)}`;
 const HomeScreen = ({ onNavigate }: { onNavigate: (tab: PhoneTab) => void }) => {
   const { state } = useGame();
   const { tone } = useTone();
-  const income = thisMonth.income;
-  const spent = thisMonth.spent;
+  const m = useStudent();
+  const income = m.income;
+  const spent = m.current.spent;
   const left = Math.round((income - spent) * 100) / 100;
   const planned = sumBudget(state.budget);
-  const projected = projectedBalance(lastMonth.income, state.budget);
-  const insight = contextualBanners(state, tone).find((b) => b.id === "delivery-left")!;
+  const projected = m.projected(state.budget);
+  const insight = homeBanner(state, tone);
   const goal = state.goal;
   const featured = featuredChallenge(state);
 
@@ -37,7 +37,7 @@ const HomeScreen = ({ onNavigate }: { onNavigate: (tab: PhoneTab) => void }) => 
       <button type="button" onClick={() => onNavigate("spending")} className="w-full text-left rounded-2xl bg-white/[0.06] border border-white/10 p-3.5 hover:bg-white/[0.09] transition-colors">
         <span className="flex items-center justify-between text-[11px] font-extrabold text-white/50">
           <span>
-            {MONTH.name} · day {MONTH.today} of {MONTH.days}
+            {m.current.name} · day {m.current.today} of {m.current.days}
           </span>
           <ChevronRight className="w-3.5 h-3.5" aria-hidden="true" />
         </span>
@@ -49,7 +49,10 @@ const HomeScreen = ({ onNavigate }: { onNavigate: (tab: PhoneTab) => void }) => 
           ].map(([k, v]) => (
             <span key={k as string}>
               <span className="block text-[10.5px] font-extrabold text-white/50">{k}</span>
-              <span className={`block text-[16px] font-black tabular ${k === "Left" ? "text-accent" : ""}`}>{eur(Math.round(v as number))}</span>
+              <span className={`block text-[16px] font-black tabular ${k === "Left" ? ((v as number) >= 0 ? "text-accent" : "text-destructive") : ""}`}>
+                {(v as number) < 0 ? "−" : ""}
+                {eur(Math.abs(Math.round(v as number)))}
+              </span>
             </span>
           ))}
         </span>
@@ -60,7 +63,7 @@ const HomeScreen = ({ onNavigate }: { onNavigate: (tab: PhoneTab) => void }) => 
           <span>
             {eur(Math.round(spent))} of {eur(planned)} planned
           </span>
-          <span>{state.budgetConfirmed ? `On plan: ${eur(projected)} left at month end` : "Plan not set"}</span>
+          <span>{!state.budgetConfirmed ? "Plan not set" : projected >= 0 ? `On plan: ${eur(Math.round(projected))} left at month end` : `On plan: ${eur(Math.round(-projected))} short at month end`}</span>
         </span>
       </button>
 

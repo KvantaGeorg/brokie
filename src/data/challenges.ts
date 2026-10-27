@@ -1,7 +1,7 @@
 /* Game rules and mock profile for the demo user: challenges, levels and the friend league.
    XP only ever comes from completed activities; it is kept apart from money. */
 
-export type ChallengeId = "delivery-budget" | "check-budget" | "goal-add";
+export type ChallengeId = "focus-budget" | "check-budget" | "goal-add";
 export type ChallengeStatus = "active" | "done" | "missed";
 
 /* Where a challenge's progress comes from, shown on the card so simulated progress is never mistaken for real behaviour. */
@@ -10,7 +10,7 @@ export type ProgressSource = "transactions" | "app" | "you";
 export const CHALLENGE_DEFS: { id: ChallengeId; xp: number; source: ProgressSource }[] = [
   { id: "goal-add", xp: 30, source: "you" },
   { id: "check-budget", xp: 20, source: "app" },
-  { id: "delivery-budget", xp: 50, source: "transactions" },
+  { id: "focus-budget", xp: 50, source: "transactions" },
 ];
 
 export const CHECK_DAYS_GOAL = 3;

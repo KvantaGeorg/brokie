@@ -1,9 +1,9 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { Check, FlaskConical, X } from "lucide-react";
 import { ProgressBar } from "../GameUI";
-import { CHALLENGE_ICONS } from "./icons";
+import { CHALLENGE_ICONS, STUDENT_ICONS } from "./icons";
 import { SOURCE_LABEL, type ChallengeView } from "./challengeModel";
-import { useGame } from "@/hooks/use-game";
+import { useGame, useStudent } from "@/hooks/use-game";
 import type { PhoneTab } from "./tabs";
 
 /* Floating "+30 XP" when a challenge pays out. */
@@ -33,7 +33,8 @@ const DemoButton = ({ label, onClick }: { label: string; onClick: () => void }) 
 
 const ChallengeCard = ({ c, interactive = true, onNavigate }: { c: ChallengeView; interactive?: boolean; onNavigate?: (tab: PhoneTab) => void }) => {
   const { state, addToGoal, nextDay, monthEnd } = useGame();
-  const Icon = CHALLENGE_ICONS[c.id];
+  const { focus } = useStudent();
+  const Icon = c.id === "focus-budget" ? STUDENT_ICONS[focus] : CHALLENGE_ICONS[c.id];
   const gain = state.lastGain?.id === c.id ? state.lastGain : null;
   const done = c.status === "done";
   const missed = c.status === "missed";
@@ -82,7 +83,7 @@ const ChallengeCard = ({ c, interactive = true, onNavigate }: { c: ChallengeView
               <DemoButton label="Next day" onClick={nextDay} />
             </>
           )}
-          {c.id === "delivery-budget" && <DemoButton label="Simulate month end" onClick={monthEnd} />}
+          {c.id === "focus-budget" && <DemoButton label="Simulate month end" onClick={monthEnd} />}
         </div>
       )}
       {missed && (

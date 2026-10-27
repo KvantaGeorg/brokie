@@ -1,14 +1,14 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { Check, ChevronLeft, Lock, TrendingDown } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, Lock, Shuffle, TrendingDown } from "lucide-react";
 import BrokieMascot from "../../brand/BrokieMascot";
 import BudgetEditor, { BudgetSummary } from "./BudgetEditor";
 import GoalForm from "./GoalForm";
-import { CATEGORY_ICONS } from "./icons";
+import { STUDENT_ICONS } from "./icons";
 import { BANKS } from "@/data/banks";
-import { lastMonth } from "@/data/budget";
-import { CATEGORIES, TRANSACTIONS, spendingByCategory, weeklyTotals } from "@/data/transactions";
-import { ONBOARDING_STEPS, useGame, type OnboardingStep } from "@/hooks/use-game";
+import { FEATURED_ID, STUDENTS, catMeta, cohortAverage } from "@/data/students";
+import { ONBOARDING_STEPS, useGame, useStudent, type OnboardingStep } from "@/hooks/use-game";
+import { useTone } from "@/hooks/use-tone";
 
 const eur = (n: number) => `€${Number.isInteger(n) ? n : n.toFixed(2)}`;
 
@@ -34,7 +34,7 @@ const AuthStep = () => {
       className="flex flex-col flex-1"
       onSubmit={(e) => {
         e.preventDefault();
-        goTo("banks");
+        goTo("student");
       }}
     >
       <BrokieMascot mood="happy" size={56} title="" />
@@ -43,7 +43,7 @@ const AuthStep = () => {
       <div className="mt-6 space-y-2.5">
         <label className="block">
           <span className="block text-[11px] font-extrabold text-white/55 mb-1">Email</span>
-          <input type="email" defaultValue="ruta@stud.vu.lt" autoComplete="off" className={field} />
+          <input type="email" defaultValue="you@student.lt" autoComplete="off" className={field} />
         </label>
         <label className="block">
           <span className="block text-[11px] font-extrabold text-white/55 mb-1">Password</span>
@@ -54,7 +54,7 @@ const AuthStep = () => {
         <button type="submit" className="w-full h-11 rounded-xl bg-accent text-accent-foreground text-[14px] font-black shadow-[0_3px_0_hsl(var(--accent-deep))] active:translate-y-0.5 active:shadow-none">
           Create account
         </button>
-        <button type="button" onClick={() => goTo("banks")} className="w-full h-11 rounded-xl border border-white/20 text-[14px] font-black">
+        <button type="button" onClick={() => goTo("student")} className="w-full h-11 rounded-xl border border-white/20 text-[14px] font-black">
           Log in
         </button>
         <Note>Demo: no account is created and nothing is sent.</Note>
@@ -63,7 +63,78 @@ const AuthStep = () => {
   );
 };
 
-/* 2. Connect banks (simulated, read-only) */
+/* 2. Pick whose money the demo runs on: one of the 40 students in the dataset */
+const LIVING = ["All", "With parents", "Dorm", "Shared flat", "Alone / with partner"];
+
+const StudentStep = () => {
+  const { pickStudent } = useGame();
+  const { setTone } = useTone();
+  const [living, setLiving] = useState("All");
+  const list = [...STUDENTS]
+    .filter((s) => living === "All" || s.living === living)
+    .sort((a, b) => (a.id === FEATURED_ID ? -1 : b.id === FEATURED_ID ? 1 : 0));
+
+  const pick = (id: string) => {
+    const s = STUDENTS.find((x) => x.id === id)!;
+    setTone(s.tone); // the tone each student chose in the dataset
+    pickStudent(id);
+  };
+
+  return (
+    <div className="flex flex-col flex-1">
+      <h2 className="text-[22px] font-black leading-tight">Pick a student</h2>
+      <p className="text-[12.5px] font-bold text-white/55 mt-1">{STUDENTS.length} real profiles from the Brokie dataset. Every number in the app comes from theirs.</p>
+      <div role="radiogroup" aria-label="Living situation" className="flex gap-1.5 overflow-x-auto no-scrollbar mt-3 -mx-1 px-1">
+        {LIVING.map((l) => (
+          <button
+            key={l}
+            type="button"
+            role="radio"
+            aria-checked={living === l}
+            onClick={() => setLiving(l)}
+            className={`shrink-0 h-7 px-2.5 rounded-full text-[11px] font-extrabold ${living === l ? "bg-accent text-accent-foreground" : "bg-white/[0.08] text-white/70 hover:text-white"}`}
+          >
+            {l === "Alone / with partner" ? "Alone" : l}
+          </button>
+        ))}
+      </div>
+      <button
+        type="button"
+        onClick={() => pick(list[Math.floor(Math.random() * list.length)].id)}
+        className="mt-3 inline-flex items-center justify-center gap-1.5 h-9 rounded-xl border border-white/20 text-[12.5px] font-black hover:bg-white/[0.05]"
+      >
+        <Shuffle className="w-3.5 h-3.5" aria-hidden="true" /> Surprise me
+      </button>
+      <ul className="mt-2 divide-y divide-white/[0.07]">
+        {list.map((s) => (
+          <li key={s.id}>
+            <button type="button" onClick={() => pick(s.id)} className="w-full flex items-center gap-3 py-2.5 text-left">
+              <span className="w-9 h-9 shrink-0 rounded-full bg-primary/30 flex items-center justify-center text-[13px] font-black" aria-hidden="true">
+                {s.name[0]}
+              </span>
+              <span className="flex-1 min-w-0">
+                <span className="flex items-center gap-1.5 text-[13.5px] font-extrabold">
+                  {s.name}, {s.age}
+                  {s.id === FEATURED_ID && <span className="rounded-full bg-accent/20 text-accent px-1.5 text-[9.5px] font-black">Suggested</span>}
+                </span>
+                <span className="block text-[11px] font-bold text-white/50 truncate">
+                  {s.uniShort} · year {s.studyYear} · {s.living === "Alone / with partner" ? "lives alone" : s.living.toLowerCase()}
+                </span>
+              </span>
+              <span className="text-right shrink-0">
+                <span className="block text-[12.5px] font-black tabular">€{Math.round(s.income.total)}</span>
+                <span className="block text-[10px] font-bold text-white/40">a month</span>
+              </span>
+              <ChevronRight className="w-3.5 h-3.5 text-white/35 shrink-0" aria-hidden="true" />
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
+/* 3. Connect banks (simulated, read-only) */
 const BanksStep = () => {
   const { state, toggleBank, goTo } = useGame();
   const n = state.banks.length;
@@ -95,21 +166,22 @@ const BanksStep = () => {
         <PrimaryButton onClick={() => goTo("analyzing")} disabled={!n}>
           {n ? `Connect ${n} bank${n > 1 ? "s" : ""}` : "Choose a bank"}
         </PrimaryButton>
-        <Note>Simulated connection. The demo uses mock transactions.</Note>
+        <Note>Demo connection. Transactions come from the Brokie student dataset.</Note>
       </div>
     </div>
   );
 };
 
-/* 3. Analysing (auto-advances) */
+/* 4. Analysing (auto-advances) */
 const AnalyzingStep = () => {
   const { goTo } = useGame();
+  const m = useStudent();
   const still = useReducedMotion() ?? false;
   useEffect(() => {
     const t = setTimeout(() => goTo("results"), 2600);
     return () => clearTimeout(t);
   }, [goTo]);
-  const lines = [`${TRANSACTIONS.length} transactions found`, `Sorted into ${CATEGORIES.length} categories`, "Spotted 1 habit to beat"];
+  const lines = [`${m.student.tx.filter((t) => t.month === 1).length} transactions found`, `Sorted into ${m.categories.length} categories`, "Spotted 1 habit to work on"];
   return (
     <div className="flex flex-col items-center justify-center flex-1 text-center" role="status">
       <div style={{ perspective: 600 }}>
@@ -132,35 +204,49 @@ const AnalyzingStep = () => {
   );
 };
 
-/* 4. What Brokie found */
+/* 5. What Brokie found */
 const ResultsStep = () => {
   const { goTo } = useGame();
-  const top = [...spendingByCategory()].sort((a, b) => b.total - a.total).slice(0, 4);
+  const m = useStudent();
+  const h = m.history;
+  const top = m.categories
+    .map((id) => ({ ...catMeta(id), total: h.byCategory(id) }))
+    .sort((a, b) => b.total - a.total)
+    .slice(0, 4);
   const max = top[0].total;
-  const weeks = weeklyTotals("delivery");
-  const avg = weeks.reduce((a, b) => a + b, 0) / weeks.length;
+  const left = Math.round((m.income - h.spent) * 100) / 100;
+  const focus = catMeta(m.focus);
+  const focusTotal = h.byCategory(m.focus);
+  const own = m.ownBudget(m.focus);
+  const peers = cohortAverage(m.focus, m.student.living);
   return (
     <div className="flex flex-col flex-1">
-      <h2 className="text-[22px] font-black leading-tight">Your October</h2>
+      <h2 className="text-[22px] font-black leading-tight">{m.student.name}'s October</h2>
+      <p className="text-[12px] font-bold text-white/50 mt-0.5">
+        {m.student.uniShort} · {m.student.city} · {m.student.bank}
+      </p>
       <div className="grid grid-cols-3 gap-2 mt-4 text-center">
         {[
-          ["In", lastMonth.income],
-          ["Out", lastMonth.spent],
-          ["Left", Math.round((lastMonth.income - lastMonth.spent) * 100) / 100],
+          ["In", Math.round(m.income)],
+          ["Out", Math.round(h.spent)],
+          ["Left", Math.round(left)],
         ].map(([k, v]) => (
           <div key={k} className="rounded-xl bg-white/[0.06] py-2.5">
             <p className="text-[10.5px] font-extrabold text-white/50">{k}</p>
-            <p className={`text-[15px] font-black tabular ${k === "Left" ? "text-accent" : ""}`}>{eur(v as number)}</p>
+            <p className={`text-[15px] font-black tabular ${k === "Left" ? (left >= 0 ? "text-accent" : "text-destructive") : ""}`}>
+              {(v as number) < 0 ? "−" : ""}
+              {eur(Math.abs(v as number))}
+            </p>
           </div>
         ))}
       </div>
       <ul className="mt-4 space-y-2">
         {top.map((c) => {
-          const Icon = CATEGORY_ICONS[c.id];
+          const Icon = STUDENT_ICONS[c.id];
           return (
             <li key={c.id} className="flex items-center gap-2.5">
               <Icon className="w-4 h-4 shrink-0" style={{ color: c.color }} strokeWidth={2.5} aria-hidden="true" />
-              <span className="w-24 text-[12px] font-extrabold">{c.label}</span>
+              <span className="w-28 text-[12px] font-extrabold leading-tight">{c.label}</span>
               <span className="flex-1 h-1.5 rounded-full bg-white/10 overflow-hidden">
                 <span className="block h-full rounded-full" style={{ width: `${(c.total / max) * 100}%`, background: c.color }} />
               </span>
@@ -176,8 +262,10 @@ const ResultsStep = () => {
             <TrendingDown className="w-3.5 h-3.5" aria-hidden="true" /> Biggest opportunity
           </p>
           <p className="text-[13px] font-extrabold leading-snug mt-0.5">
-            Food delivery: {eur(lastMonth.byCategory("delivery"))}. The last week alone was {(weeks[3] / avg).toFixed(1)}x your weekly average.
+            {focus.label}: {eur(Math.round(focusTotal))} in October.{" "}
+            {own != null && focusTotal > own ? `That's ${eur(Math.round(focusTotal - own))} over the ${eur(own)} you set yourself.` : `Students with the same living situation average ${eur(peers)}.`}
           </p>
+          {left < 0 && <p className="text-[12px] font-bold text-white/70 mt-1">October cost {eur(Math.round(-left))} more than came in. The plan starts there.</p>}
         </div>
       </div>
       <div className="mt-auto pt-4">
@@ -193,7 +281,7 @@ const BudgetStep = () => {
   return (
     <div>
       <h2 className="text-[22px] font-black leading-tight">Your November plan</h2>
-      <p className="text-[12.5px] font-bold text-white/55 mt-1">Suggested from October. Change any limit.</p>
+      <p className="text-[12.5px] font-bold text-white/55 mt-1">Built from your own limits and the last two months. Change any of them.</p>
       <div className="mt-4">
         <BudgetSummary compareLastMonth />
       </div>
@@ -219,13 +307,15 @@ const BudgetStep = () => {
 /* 6. Savings goal */
 const GoalStep = () => {
   const { state, saveGoal, goTo } = useGame();
+  const { student } = useStudent();
+  const fromDataset = { name: student.goal.name, target: student.goal.target, saved: student.goal.saved, date: student.goal.date ?? undefined };
   return (
     <div>
       <BrokieMascot mood="proud" size={48} title="" />
       <h2 className="text-[22px] font-black leading-tight mt-3">Save for something</h2>
-      <p className="text-[12.5px] font-bold text-white/55 mt-1 mb-4">A goal makes the plan worth it.</p>
+      <p className="text-[12.5px] font-bold text-white/55 mt-1 mb-4">A goal makes the plan worth it. This is {student.name}'s goal from the dataset.</p>
       <GoalForm
-        initial={state.goal ?? undefined}
+        initial={state.goal ?? fromDataset}
         submitLabel={state.goal ? "Save goal" : "Create goal"}
         onSubmit={(g) => {
           saveGoal(g);
@@ -240,6 +330,7 @@ const GoalStep = () => {
 
 const STEP_VIEW: Record<Exclude<OnboardingStep, "done">, () => JSX.Element> = {
   auth: AuthStep,
+  student: StudentStep,
   banks: BanksStep,
   analyzing: AnalyzingStep,
   results: ResultsStep,
@@ -247,7 +338,7 @@ const STEP_VIEW: Record<Exclude<OnboardingStep, "done">, () => JSX.Element> = {
   goal: GoalStep,
 };
 
-const BACK: Partial<Record<OnboardingStep, OnboardingStep>> = { banks: "auth", results: "banks", budget: "results", goal: "budget" };
+const BACK: Partial<Record<OnboardingStep, OnboardingStep>> = { student: "auth", banks: "student", results: "banks", budget: "results", goal: "budget" };
 
 /* Interactive first run inside the demo phone: sign up → connect bank → analysis → budget → goal. */
 const Onboarding = () => {

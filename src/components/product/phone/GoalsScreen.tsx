@@ -6,7 +6,7 @@ import { ProgressBar } from "../GameUI";
 import ChallengeCard from "./ChallengeCard";
 import GoalForm from "./GoalForm";
 import { challengeViews } from "./challengeModel";
-import { useGame, type Goal } from "@/hooks/use-game";
+import { useGame, useStudent, type Goal } from "@/hooks/use-game";
 import type { PhoneTab } from "./tabs";
 
 const eur = (n: number) => `€${Number.isInteger(n) ? n : n.toFixed(2)}`;
@@ -116,6 +116,7 @@ const GoalCard = ({ goal }: { goal: Goal }) => {
 /* Goals tab: the goal, the challenges tied to it and the budget, and what's done. */
 const GoalsScreen = ({ onNavigate }: { onNavigate: (tab: PhoneTab) => void }) => {
   const { state, saveGoal } = useGame();
+  const { student } = useStudent();
   const views = challengeViews(state);
   const active = views.filter((c) => c.status === "active");
   const finished = views.filter((c) => c.status !== "active");
@@ -127,7 +128,7 @@ const GoalsScreen = ({ onNavigate }: { onNavigate: (tab: PhoneTab) => void }) =>
       ) : (
         <div className="rounded-2xl bg-white/[0.06] border border-white/10 p-3.5">
           <h2 className="text-[19px] font-black leading-tight mb-3">Save for something</h2>
-          <GoalForm submitLabel="Create goal" onSubmit={saveGoal} />
+          <GoalForm initial={{ name: student.goal.name, target: student.goal.target, saved: student.goal.saved, date: student.goal.date ?? undefined }} submitLabel="Create goal" onSubmit={saveGoal} />
         </div>
       )}
 

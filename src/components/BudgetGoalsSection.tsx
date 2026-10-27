@@ -117,7 +117,7 @@ const GoalPreview = () => {
 };
 
 const BudgetGoalsSection = () => (
-  <section id="budget-goals" className="section">
+  <section id="budget-goals" className="section section-alt">
     <div className="container mx-auto px-4 sm:px-6 lg:px-8">
       <SectionHeader
         label="Budget & goals"

@@ -18,7 +18,7 @@ const SpendingSection = () => {
   const Icon = CATEGORY_ICONS[sel.id];
 
   return (
-    <section id="features" className="section section-alt">
+    <section id="features" className="section">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <SectionHeader label="Spending insights" title="Your spending, decoded." desc="Sometimes the biggest surprise isn't what you bought. It's how often you bought it." />
 

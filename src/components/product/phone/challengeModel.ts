@@ -1,5 +1,5 @@
 import { CHALLENGE_DEFS, CHECK_DAYS_GOAL, GOAL_ADD_TARGET, type ChallengeId, type ChallengeStatus, type ProgressSource } from "@/data/challenges";
-import { thisMonth } from "@/data/budget";
+import { catMeta, modelFor } from "@/data/students";
 import { goalAdded, type GameState } from "@/hooks/use-game";
 
 /* What a challenge card shows, computed from the shared state so every screen agrees. */
@@ -55,16 +55,18 @@ export const challengeViews = (s: GameState): ChallengeView[] =>
           max: CHECK_DAYS_GOAL,
           progressText: `${Math.min(CHECK_DAYS_GOAL, s.checks.days)} of ${CHECK_DAYS_GOAL} days`,
         };
-      case "delivery-budget": {
-        const spent = thisMonth.byCategory("delivery");
-        const limit = s.budget.delivery;
+      case "focus-budget": {
+        const { focus, current } = modelFor(s.studentId);
+        const label = catMeta(focus).label.toLowerCase();
+        const spent = current.byCategory(focus);
+        const limit = s.budget[focus];
         return {
           id,
           xp,
           source,
           status,
-          title: `Stay under €${limit} on food delivery this month`,
-          description: spent <= limit ? `${eur(Math.round((limit - spent) * 100) / 100)} left in your delivery budget.` : `${eur(Math.round((spent - limit) * 100) / 100)} over your delivery budget.`,
+          title: `Stay under €${limit} on ${label} this month`,
+          description: spent <= limit ? `${eur(Math.round((limit - spent) * 100) / 100)} left for ${label}.` : `${eur(Math.round((spent - limit) * 100) / 100)} over your ${label} budget.`,
           value: Math.min(spent, limit),
           max: Math.max(limit, 1),
           progressText: `${eur(spent)} of €${limit} used`,
