@@ -3,6 +3,7 @@ import { RiseWords } from "./fx/Motion";
 import { Blobs } from "./product/ProductUI";
 import PhoneShowcase from "./product/PhoneShowcase";
 import { Link } from "react-router-dom";
+import SourceLink from "./SourceLink";
 import { SITE } from "@/config/site";
 
 const HeroSection = () => (
@@ -34,7 +35,7 @@ const HeroSection = () => (
             <li key={s.value} className="glass rounded-2xl p-4">
               <span className="block text-[30px] font-black text-accent leading-none">{s.value}</span>
               <span className="block text-[14px] font-semibold text-foreground/90 mt-1.5 leading-snug">{s.text}</span>
-              <span className="block text-[12px] font-bold text-muted-foreground mt-1">Source: {s.source}</span>
+              <SourceLink id={s.source} className="mt-1.5" />
             </li>
           ))}
         </motion.ul>

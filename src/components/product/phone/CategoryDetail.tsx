@@ -8,8 +8,8 @@ import { categoryInsight } from "@/data/insights";
 const eur = (n: number) => `€${Math.abs(n).toFixed(2)}`;
 const day = (date: string) => new Date(date).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
 
-/* One path node opened: the category's month, Brokie's take, week-by-week bars and every payment. */
-const CategoryDetail = ({ id, locked, onBack }: { id: SpendCategory; locked: boolean; onBack: () => void }) => {
+/* One category opened: the category's month, Brokie's take, week-by-week bars and every payment. */
+const CategoryDetail = ({ id, locked, onBack, backLabel = "Back" }: { id: SpendCategory; locked: boolean; onBack: () => void; backLabel?: string }) => {
   const backRef = useRef<HTMLButtonElement>(null);
   const cat = CATEGORIES.find((c) => c.id === id)!;
   const Icon = CATEGORY_ICONS[id];
@@ -19,17 +19,19 @@ const CategoryDetail = ({ id, locked, onBack }: { id: SpendCategory; locked: boo
   const peak = weeks.indexOf(Math.max(...weeks));
   const payments = TRANSACTIONS.filter((t) => t.category === id).sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id);
 
-  useEffect(() => backRef.current?.focus({ preventScroll: true }), []);
+  useEffect(() => {
+    backRef.current?.focus({ preventScroll: true });
+  }, []);
 
   return (
-    <div className="px-5 pb-4" onKeyDown={(e) => e.key === "Escape" && onBack()}>
+    <div className="pb-2" onKeyDown={(e) => e.key === "Escape" && onBack()}>
       <button
         ref={backRef}
         type="button"
         onClick={onBack}
         className="inline-flex items-center gap-0.5 -ml-1.5 rounded-lg px-1.5 py-1 text-[12px] font-extrabold text-white/60 hover:text-white"
       >
-        <ChevronLeft className="w-4 h-4" aria-hidden="true" /> Path
+        <ChevronLeft className="w-4 h-4" aria-hidden="true" /> {backLabel}
       </button>
 
       <div className="flex items-center gap-3 mt-2">

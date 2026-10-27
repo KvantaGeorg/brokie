@@ -5,7 +5,7 @@ import BrokieMascot from "../brand/BrokieMascot";
 import PhoneFrame from "./PhoneFrame";
 import AppTopBar from "./phone/AppTopBar";
 import SpendingScreen from "./phone/SpendingScreen";
-import ChallengesScreen from "./phone/ChallengesScreen";
+import GoalsScreen from "./phone/GoalsScreen";
 import LevelUpOverlay from "./phone/LevelUpOverlay";
 import { PHONE_TABS, type PhoneTab } from "./phone/tabs";
 import { BANKS, DEMO_PICKED_BANKS } from "@/data/banks";
@@ -20,11 +20,19 @@ const SCENES = [
   { id: "auth", ms: 3400 },
   { id: "banks", ms: 3600 },
   { id: "analyzing", ms: 2800 },
-  { id: "spending", ms: 3800 },
-  { id: "challenge", ms: 6200 },
+  { id: "budget", ms: 4200 },
+  { id: "goal", ms: 6200 },
 ] as const;
 
 type SceneId = (typeof SCENES)[number]["id"];
+
+/* The showcase starts already onboarded, close enough to a level that the goal top-up levels up. */
+const SHOWCASE_STATE = {
+  step: "done" as const,
+  budgetConfirmed: true,
+  goal: { name: "Trip to Riga", target: 150, saved: 45 },
+  xp: 480,
+};
 
 /* Runs `fn` after `ms`, cleaned up when the scene unmounts. */
 const useAfter = (ms: number, fn: () => void) => {
@@ -198,16 +206,15 @@ const StaticTabBar = ({ active }: { active: PhoneTab }) => (
   </div>
 );
 
-/* 5–6. Inside the app: spending, then a challenge being logged until it levels you up. */
-const AppScene = ({ tab }: { tab: "spending" | "challenges" }) => {
-  const { state, logProgress } = useGame();
-  useAfter(1100, () => tab === "challenges" && logProgress("delivery-10"));
-  useAfter(2300, () => tab === "challenges" && logProgress("delivery-10"));
+/* 5–6. Inside the app: the November budget, then €10 recorded for the Riga goal, which completes a challenge and levels up. */
+const AppScene = ({ tab }: { tab: "spending" | "goals" }) => {
+  const { state, addToGoal } = useGame();
+  useAfter(2600, () => tab === "goals" && addToGoal(10));
 
   return (
     <>
       <AppTopBar streak={PROFILE.streak} totalXp={state.totalXp} level={state.level} />
-      <div className="absolute top-[84px] bottom-[64px] left-0 right-0 overflow-hidden">{tab === "spending" ? <SpendingScreen /> : <ChallengesScreen showReset={false} />}</div>
+      <div className="absolute top-[84px] bottom-[64px] left-0 right-0 overflow-hidden">{tab === "spending" ? <SpendingScreen live={false} /> : <GoalsScreen onNavigate={() => {}} />}</div>
       <LevelUpOverlay />
       <StaticTabBar active={tab} />
     </>
@@ -224,10 +231,10 @@ const renderScene = (id: SceneId) => {
       return <BanksScene />;
     case "analyzing":
       return <AnalyzingScene />;
-    case "spending":
+    case "budget":
       return <AppScene tab="spending" />;
-    case "challenge":
-      return <AppScene tab="challenges" />;
+    case "goal":
+      return <AppScene tab="goals" />;
   }
 };
 
@@ -256,12 +263,12 @@ const PhoneShowcase = () => {
     screenRef.current?.setAttribute("inert", "");
   }, []);
 
-  const scene = still ? "spending" : SCENES[idx].id;
+  const scene = still ? "budget" : SCENES[idx].id;
 
   return (
     <PhoneFrame ref={frameRef} label="Animated preview of the Brokie app: loading, signing in, connecting a bank, analysing spending, and completing a weekly challenge">
       <div ref={screenRef} aria-hidden="true" className="absolute inset-0 select-none">
-        <GameProvider key={cycle}>
+        <GameProvider key={cycle} initial={SHOWCASE_STATE}>
           <AnimatePresence mode="wait">
             <motion.div
               key={`${cycle}-${scene}`}

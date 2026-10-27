@@ -1,26 +1,20 @@
-/* Mock game state for the demo user: challenges, levels and the friend league. */
+/* Game rules and mock profile for the demo user: challenges, levels and the friend league.
+   XP only ever comes from completed activities; it is kept apart from money. */
 
-export type Challenge = {
-  id: string;
-  title: string;
-  progress: number;
-  goal: number;
-  unit: "€" | "days" | "times";
-  xp: number;
-  status: "active" | "done";
-  left?: string;
-};
+export type ChallengeId = "delivery-budget" | "check-budget" | "goal-add";
+export type ChallengeStatus = "active" | "done" | "missed";
 
-export const CHALLENGES: Challenge[] = [
-  { id: "delivery-10", title: "Spend €10 less on delivery than last week", progress: 6, goal: 10, unit: "€", xp: 50, status: "active", left: "3 days left" },
-  { id: "no-delivery-3", title: "No delivery for 3 days in a row", progress: 2, goal: 3, unit: "days", xp: 30, status: "active", left: "1 day to go" },
-  { id: "bus-not-bolt", title: "Take the bus instead of Bolt 4 times", progress: 1, goal: 4, unit: "times", xp: 20, status: "active", left: "5 days left" },
-  { id: "check-in-7", title: "Check your balance 7 days in a row", progress: 7, goal: 7, unit: "days", xp: 40, status: "done" },
-  { id: "going-out-20", title: "Keep going out under €20 last week", progress: 20, goal: 20, unit: "€", xp: 30, status: "done" },
+/* Where a challenge's progress comes from, shown on the card so simulated progress is never mistaken for real behaviour. */
+export type ProgressSource = "transactions" | "app" | "you";
+
+export const CHALLENGE_DEFS: { id: ChallengeId; xp: number; source: ProgressSource }[] = [
+  { id: "goal-add", xp: 30, source: "you" },
+  { id: "check-budget", xp: 20, source: "app" },
+  { id: "delivery-budget", xp: 50, source: "transactions" },
 ];
 
-export const formatProgress = (c: Challenge) =>
-  c.unit === "€" ? `€${c.progress}/€${c.goal}` : `${c.progress}/${c.goal} ${c.unit}`;
+export const CHECK_DAYS_GOAL = 3;
+export const GOAL_ADD_TARGET = 10;
 
 export const PROFILE = {
   name: "Rūta",
@@ -31,7 +25,6 @@ export const PROFILE = {
   weekXp: 340,
   streak: 12,
   bestStreak: 21,
-  savedThisMonth: 47,
 };
 
 /* Level ladder: XP needed to finish a level grows by 100 each time. */
@@ -44,10 +37,6 @@ const LEVEL_TITLES: Record<number, string> = {
 };
 export const levelTitle = (level: number) => LEVEL_TITLES[level] ?? "Broke-No-More Legend";
 export const levelXp = (level: number) => 500 + Math.max(0, level - 7) * 100;
-
-/* XP for each logged step, on top of the challenge's own reward when it's finished. */
-export const XP_PER_LOG = 10;
-export const stepFor = (c: Challenge) => (c.unit === "€" ? 2 : 1);
 
 export const FRIENDS = [
   { name: "Gabija", xp: 410, emoji: "🦊" },

@@ -76,12 +76,12 @@ const GamificationSection = () => {
               <BrokieMascot mood="happy" size={80} className="shrink-0 hidden sm:block" title="" />
               <div className="flex-1">
                 <div className="flex items-center justify-between gap-3">
-                  <p className="micro-label">Weekly challenge</p>
-                  <span className="text-[13px] font-extrabold text-muted-foreground">3 days left · +50 XP</span>
+                  <p className="micro-label">Monthly challenge</p>
+                  <span className="text-[13px] font-extrabold text-muted-foreground">16 days left · +50 XP</span>
                 </div>
-                <p className="text-[20px] font-black mt-1">Spend €10 less on delivery than last week</p>
-                <ProgressBar value={6} max={10} label="Weekly challenge progress" className="mt-4 h-4" />
-                <p className="text-[14px] font-bold text-muted-foreground mt-2">€6 of €10 saved. Brokie can smell victory. 🍌</p>
+                <p className="text-[20px] font-black mt-1">Stay under €55 on food delivery this month</p>
+                <ProgressBar value={43} max={55} label="Delivery budget used" className="mt-4 h-4" />
+                <p className="text-[14px] font-bold text-muted-foreground mt-2">€43 of €55 used, €12 left. Choose wisely. 🍌</p>
               </div>
             </FadeUp>
           </div>

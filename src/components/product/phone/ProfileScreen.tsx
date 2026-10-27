@@ -1,13 +1,23 @@
-import { Flame, PiggyBank, Trophy } from "lucide-react";
+import { Bike, CalendarCheck, Flame, PiggyBank, RotateCcw, Target, Trophy, Wallet, type LucideIcon } from "lucide-react";
 import BrokieMascot from "../../brand/BrokieMascot";
 import { ProgressBar } from "../GameUI";
 import { FRIENDS, PROFILE, levelTitle, levelXp } from "@/data/challenges";
-import { useGame } from "@/hooks/use-game";
+import { useGame, type GameState } from "@/hooks/use-game";
 
-/* Level progress, three stats and the top of the friend league. */
+/* Achievements unlock from what the user actually did in this session. */
+const achievements = (s: GameState): { id: string; icon: LucideIcon; title: string; unlocked: boolean }[] => [
+  { id: "budget", icon: Wallet, title: "First budget", unlocked: s.budgetConfirmed },
+  { id: "goal", icon: Target, title: "Goal setter", unlocked: !!s.goal },
+  { id: "saver", icon: PiggyBank, title: "Halfway there", unlocked: !!s.goal && s.goal.saved >= s.goal.target / 2 },
+  { id: "checker", icon: CalendarCheck, title: "Budget habit", unlocked: s.challenges["check-budget"] === "done" },
+  { id: "first", icon: Trophy, title: "First challenge", unlocked: Object.values(s.challenges).includes("done") },
+  { id: "delivery", icon: Bike, title: "Delivery tamer", unlocked: s.challenges["delivery-budget"] === "done" },
+];
+
+/* Level, streaks, achievements and the weekly friend league. */
 const ProfileScreen = () => {
   const p = PROFILE;
-  const { state } = useGame();
+  const { state, restart } = useGame();
   const need = levelXp(state.level);
   const league = [...FRIENDS.map((f) => ({ name: f.name, xp: f.xp })), { name: "You", xp: state.weekXp }].sort((a, b) => b.xp - a.xp);
   const youRank = league.findIndex((f) => f.name === "You");
@@ -15,7 +25,7 @@ const ProfileScreen = () => {
   const stats = [
     { icon: Flame, value: String(p.streak), label: "Day streak" },
     { icon: Trophy, value: String(p.bestStreak), label: "Best streak" },
-    { icon: PiggyBank, value: `€${p.savedThisMonth}`, label: "Saved" },
+    { icon: PiggyBank, value: state.goal ? `€${Math.round(state.goal.saved)}` : "€0", label: "Goal savings" },
   ];
 
   return (
@@ -39,7 +49,7 @@ const ProfileScreen = () => {
         </p>
       </div>
 
-      <ul className="grid grid-cols-3 gap-2 mt-5">
+      <ul className="grid grid-cols-3 gap-2 mt-4">
         {stats.map(({ icon: Icon, value, label }) => (
           <li key={label} className="rounded-xl bg-white/[0.06] px-2 py-2.5 text-center">
             <Icon className="w-4 h-4 mx-auto text-accent" strokeWidth={2.5} aria-hidden="true" />
@@ -49,7 +59,18 @@ const ProfileScreen = () => {
         ))}
       </ul>
 
-      <h3 className="text-[11px] font-extrabold text-white/50 mt-5 mb-1">Friend league · you're #{youRank + 1}</h3>
+      <h3 className="text-[11px] font-extrabold text-white/50 mt-5 mb-2">Achievements</h3>
+      <ul className="grid grid-cols-3 gap-2">
+        {achievements(state).map(({ id, icon: Icon, title, unlocked }) => (
+          <li key={id} className={`rounded-xl px-1.5 py-2.5 text-center ${unlocked ? "bg-accent/15" : "bg-white/[0.04]"}`}>
+            <Icon className={`w-4 h-4 mx-auto ${unlocked ? "text-accent" : "text-white/30"}`} strokeWidth={2.5} aria-hidden="true" />
+            <span className={`block text-[10.5px] font-extrabold mt-1.5 leading-tight ${unlocked ? "" : "text-white/40"}`}>{title}</span>
+            <span className="sr-only">{unlocked ? "unlocked" : "locked"}</span>
+          </li>
+        ))}
+      </ul>
+
+      <h3 className="text-[11px] font-extrabold text-white/50 mt-5 mb-1">Friend league this week · you're #{youRank + 1}</h3>
       <ol className="divide-y divide-white/[0.07]">
         {league.slice(0, 4).map((f, i) => {
           const you = f.name === "You";
@@ -65,6 +86,10 @@ const ProfileScreen = () => {
           );
         })}
       </ol>
+
+      <button type="button" onClick={restart} className="mt-5 mx-auto flex items-center gap-1.5 rounded-lg px-2 py-1 text-[11px] font-extrabold text-white/45 hover:text-white">
+        <RotateCcw className="w-3 h-3" aria-hidden="true" /> Restart demo from sign-up
+      </button>
     </div>
   );
 };

@@ -1,16 +1,20 @@
 import { ScrollRevealText } from "./fx/Motion";
 import { Blobs, FadeUp } from "./product/ProductUI";
+import SourceLink from "./SourceLink";
+import type { SourceId } from "@/config/site";
 
-const problems = [
+const problems: { emoji: string; title: string; desc: string; stat?: { value: string; text: string; source: SourceId } }[] = [
   {
     emoji: "😬",
     title: "Money anxiety",
     desc: "Lots of young people avoid opening their banking app because they're scared of what they'll see. Out of sight, out of budget.",
+    stat: { value: "65%", text: "of 18–44 year-olds feel they should save more, but thinking about money is too stressful", source: "fidelity" },
   },
   {
     emoji: "🧋",
     title: "Invisible small spending",
     desc: "€4 coffee, €13 Wolt, €9.99 Netflix. None of it feels big, but in our demo month delivery, cafés and subscriptions cost more than groceries.",
+    stat: { value: "52%", text: "of Gen Zers who regret their spending have regretted food delivery", source: "nerdwallet" },
   },
   {
     emoji: "📆",
@@ -34,12 +38,21 @@ const ProblemSection = () => (
         <ul className="grid md:grid-cols-3 gap-4 mt-14">
           {problems.map((p, i) => (
             <li key={p.title} className="h-full">
-              <FadeUp delay={i * 0.08} className="glass rounded-3xl p-7 h-full transition-transform duration-300 hover:-translate-y-1.5">
+              <FadeUp delay={i * 0.08} className="glass rounded-3xl p-7 h-full flex flex-col transition-transform duration-300 hover:-translate-y-1.5">
                 <span className="text-[40px] leading-none" aria-hidden="true">
                   {p.emoji}
                 </span>
                 <h3 className="text-[22px] mt-5 mb-2">{p.title}</h3>
-                <p className="text-[16px] text-muted-foreground font-semibold leading-relaxed">{p.desc}</p>
+                <p className="text-[16px] text-muted-foreground font-semibold leading-relaxed mb-5">{p.desc}</p>
+                {p.stat && (
+                  <p className="mt-auto pt-4 border-t border-white/10">
+                    <span className="text-[24px] font-black text-accent leading-none">{p.stat.value}</span>{" "}
+                    <span className="text-[14px] font-semibold text-foreground/90">{p.stat.text}</span>
+                    <span className="block mt-1.5">
+                      <SourceLink id={p.stat.source} />
+                    </span>
+                  </p>
+                )}
               </FadeUp>
             </li>
           ))}

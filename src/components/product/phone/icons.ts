@@ -1,5 +1,6 @@
-import { Bike, Bus, ClipboardCheck, Eye, Home, PartyPopper, Receipt, ShoppingCart, Tv, UtensilsCrossed, type LucideIcon } from "lucide-react";
+import { Bike, Bus, CalendarCheck, Home, PartyPopper, PiggyBank, Receipt, ShoppingCart, Tv, type LucideIcon } from "lucide-react";
 import type { SpendCategory } from "@/data/transactions";
+import type { ChallengeId } from "@/data/challenges";
 
 /* Icons the app uses instead of emoji. */
 export const CATEGORY_ICONS: Record<SpendCategory, LucideIcon> = {
@@ -12,12 +13,8 @@ export const CATEGORY_ICONS: Record<SpendCategory, LucideIcon> = {
   other: Receipt,
 };
 
-export const CHALLENGE_ICONS: Record<string, LucideIcon> = {
-  "delivery-10": Bike,
-  "no-delivery-3": UtensilsCrossed,
-  "bus-not-bolt": Bus,
-  "check-in-7": Eye,
-  "going-out-20": PartyPopper,
+export const CHALLENGE_ICONS: Record<ChallengeId, LucideIcon> = {
+  "goal-add": PiggyBank,
+  "check-budget": CalendarCheck,
+  "delivery-budget": Bike,
 };
-
-export const challengeIcon = (id: string) => CHALLENGE_ICONS[id] ?? ClipboardCheck;
