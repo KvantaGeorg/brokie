@@ -25,8 +25,8 @@ export const EQUIVALENTS: Equivalent[] = [
 ];
 
 /* A comparison that reads well for this amount: between about 2 and 60 of something. The seed picks which. */
-export const funnyEquivalent = (amount: number, seed: number) => {
-  const fits = EQUIVALENTS.filter((e) => amount / e.price >= 2 && amount / e.price <= 60);
+export const funnyEquivalent = (amount: number, seed: number, skip?: string) => {
+  const fits = EQUIVALENTS.filter((e) => e.id !== skip && amount / e.price >= 2 && amount / e.price <= 60);
   const list = fits.length ? fits : EQUIVALENTS.filter((e) => e.id === "noodles");
   const e = list[Math.abs(seed) % list.length];
   const qty = Math.round(amount / e.price);
