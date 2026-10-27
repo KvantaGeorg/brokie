@@ -56,7 +56,7 @@ const BankMock = () => (
 );
 
 const BanksSection = () => (
-  <section id="banks" className="section section-alt">
+  <section id="banks" className="section">
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-2 gap-14 lg:gap-16 items-center">
       <div>
         <SectionHeader

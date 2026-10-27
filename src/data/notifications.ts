@@ -1,5 +1,3 @@
-import type { SpendCategory } from "./transactions";
-import { toEquivalent, type Equivalent } from "./equivalents";
 
 /* Brokie's notifications on the landing page. Tone rule: joke about the situation, never the person,
    never shame essentials, and mix in praise. No emoji. */
@@ -41,35 +39,3 @@ export const EXAMPLES: ExampleNotification[] = [
     },
   },
 ];
-
-/* Category phrasing used by the "Try Brokie" generator. */
-export const DEMO_CATEGORIES: { id: SpendCategory; label: string; noun: string }[] = [
-  { id: "delivery", label: "Food delivery", noun: "delivery order" },
-  { id: "goingOut", label: "Going out", noun: "night out" },
-  { id: "groceries", label: "Groceries", noun: "grocery run" },
-  { id: "transport", label: "Taxi / Bolt", noun: "Bolt ride" },
-  { id: "subscriptions", label: "Subscriptions", noun: "subscription" },
-  { id: "other", label: "Shopping", noun: "shopping haul" },
-];
-
-const DEMO_TEMPLATES: Record<Tone, string[]> = {
-  gentle: [
-    "That €{amount} {noun} could have bought {equivalent}. Just saying.",
-    "Fun fact: €{amount} on that {noun} is {equivalent}. No judgement, only maths.",
-    "€{amount} {noun}? That's {equivalent}. Brokie believes in you anyway.",
-  ],
-  savage: [
-    "That €{amount} {noun} = {equivalent}. Brokie did the maths so you didn't have to.",
-    "€{amount} on a {noun}. Or {equivalent}. Brokie is not mad. Brokie is calculating.",
-    "{equivalent}. That's what that €{amount} {noun} could have been. Think about it.",
-  ],
-};
-
-export const buildDemoNotification = (amount: number, category: SpendCategory, tone: Tone, eq: Equivalent, variant: number) => {
-  const cat = DEMO_CATEGORIES.find((c) => c.id === category) ?? DEMO_CATEGORIES[0];
-  const e = toEquivalent(amount, eq);
-  const templates = DEMO_TEMPLATES[tone];
-  const amountText = Number.isInteger(amount) ? String(amount) : amount.toFixed(2);
-  const text = templates[variant % templates.length].replace("{amount}", amountText).replace("{noun}", cat.noun).replace("{equivalent}", e.text);
-  return text.charAt(0).toUpperCase() + text.slice(1);
-};

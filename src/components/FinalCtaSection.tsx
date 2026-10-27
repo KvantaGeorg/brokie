@@ -3,7 +3,7 @@ import BrokieMascot from "./brand/BrokieMascot";
 import { SITE } from "@/config/site";
 
 const FinalCtaSection = () => (
-  <section className="section">
+  <section className="section section-alt">
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
       <BrokieMascot mood="happy" size={88} className="mx-auto" title="" />
       <h2 className="mt-6 leading-[1.05]" style={{ fontSize: "clamp(36px, 5.4vw, 64px)" }}>
