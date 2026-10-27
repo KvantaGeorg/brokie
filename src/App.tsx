@@ -4,12 +4,8 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Index from "./pages/Index.tsx";
-
-
+import Demo from "./pages/Demo.tsx";
 import NotFound from "./pages/NotFound.tsx";
-import PrivacyPolicy from "./pages/PrivacyPolicy.tsx";
-import TermsOfService from "./pages/TermsOfService.tsx";
-import { BenefitsPage, FAQPage, HowItWorksPage, ProblemPage, ProposalsPage } from "./pages/SectionPages.tsx";
 import ScrollToTop from "./components/ScrollToTop.tsx";
 
 const queryClient = new QueryClient();
@@ -19,18 +15,11 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <ScrollToTop />
         <Routes>
           <Route path="/" element={<Index />} />
-          <Route path="/problem" element={<ProblemPage />} />
-          <Route path="/how-it-works" element={<HowItWorksPage />} />
-          <Route path="/proposals" element={<ProposalsPage />} />
-          <Route path="/benefits" element={<BenefitsPage />} />
-          <Route path="/faq" element={<FAQPage />} />
-          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-          <Route path="/terms-of-service" element={<TermsOfService />} />
-          
+          <Route path="/demo" element={<Demo />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

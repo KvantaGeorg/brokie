@@ -1,6 +1,8 @@
-# Website template
+# Brokie
 
-Marketing site template (React + Vite + Tailwind + shadcn/ui + framer-motion), based on an existing landing page with all brand-specific content removed.
+**Level up out of broke.** Landing page prototype for Brokie, an app that shows students (18–25) where their money really goes and turns better spending habits into a game: streaks, XP, levels and weekly challenges, plus funny notifications from Brokie the coin.
+
+Student project for the FinTech Ecosystem and Management course. Front-end only, no backend or bank API; all data is mock data.
 
 ## Run locally
 
@@ -11,18 +13,17 @@ npm run dev
 
 The site runs at http://localhost:8080.
 
-## Rebrand checklist
+## Where things live
 
-1. **`src/config/site.ts`**: name, domain, hero text, sign-up / demo links, email, LinkedIn, credit badges.
-2. **`index.html`**: page title, description, social preview tags.
-3. **Logo**: `src/components/brand/Brand.tsx` renders a text wordmark; swap in an image when you have one. Favicon is `public/favicon.svg`.
-4. **Colours and font**: `src/index.css` (CSS variables) and `tailwind.config.ts`.
-5. **Section copy**: `src/components/*Section.tsx`, especially `StatementSection`, `HowItWorksSection`, `ProposalsSection`, `BenefitsSection`, `FAQSection`, `SuppliersLine`.
-6. **Product mockups**: `src/components/product/*` and `src/components/fx/TabChaos.tsx` contain example data (hotels, suppliers, prices). Example photos load from Unsplash.
-7. **Sign-up form**: `src/components/WaitlistSection.tsx` has a `TODO` where the email should be sent to your backend.
-8. **Legal pages**: `src/pages/PrivacyPolicy.tsx` and `TermsOfService.tsx` are placeholders.
-9. **Hosting**: `Dockerfile` + `nginx.conf` (update `server_name`).
+- `src/index.css` / `tailwind.config.ts`: theme (purple / yellow colour tokens, glass and chunky-button classes, animations)
+- `src/config/site.ts`: brand copy, hero stats, footer note
+- `src/data/transactions.ts`: one mock month for a student in Vilnius
+- `src/data/equivalents.ts`: approximate price list for the "that's 10 kg of bananas" jokes
+- `src/data/notifications.ts`: Brokie's notifications in Gentle and Savage mode
+- `src/components/brand/BrokieMascot.tsx`: the mascot, inline SVG with moods
+- `src/components/product/PhoneMockup.tsx`: the app mockup in the hero
+- `src/components/*Section.tsx`: page sections, in order in `src/pages/Index.tsx`
 
-## Pages
+## Hosting
 
-`/`, `/problem`, `/how-it-works`, `/proposals`, `/benefits`, `/faq`, `/privacy-policy`, `/terms-of-service`.
+`Dockerfile` + `nginx.conf` (update `server_name`).

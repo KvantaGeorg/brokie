@@ -1,22 +1,19 @@
-/* One place to rebrand the template: name, copy, links and contacts. */
+/* One place for the brand: name, copy, links. */
 export const SITE = {
-  name: "YourBrand",
-  domain: "yourbrand.com",
-  appDomain: "app.yourbrand.com",
-  description: "Short one-line description of your product for search engines and link previews.",
-  heroTitle: ["One search.", "Every supplier."],
-  heroSubtitle: "Compare live rates from all your suppliers in one place, and book the best one.",
+  name: "Brokie",
+  tagline: "Level up out of broke.",
+  description: "Brokie shows students where their money really goes, roasts them a little, and turns better spending habits into a game.",
+  heroTitle: ["Most students don't know", "where their money goes."],
+  heroSubtitle: "Brokie shows you, roasts you a little, and helps you level up out of broke.",
 
-  signupUrl: "#",
-  demoUrl: "#",
-  email: "hello@yourbrand.com",
-  linkedinUrl: "#",
-
-  /* Small credit line under the hero; set to [] to hide */
-  badges: [
-    { label: "A Your Company company", url: "#" },
-    { label: "Backed by Your Investor", url: "#" },
+  /* Hero stat chips, with sources */
+  stats: [
+    { value: "59%", text: "of young people cringe at checking their balance", source: "Fidelity" },
+    { value: "72%", text: "of Gen Z regret their spending at least sometimes", source: "NerdWallet" },
   ],
 
-  legalUpdated: "January 1, 2026",
+  tryHref: "#try",
+  demoPath: "/demo",
+
+  footerNote: "Student project for the FinTech Ecosystem and Management course. Demo uses mock data.",
 };
