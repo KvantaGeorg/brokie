@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import BrokieMascot from "@/components/brand/BrokieMascot";
 
 const NotFound = () => (
@@ -6,9 +7,9 @@ const NotFound = () => (
       <BrokieMascot mood="shocked" size={100} className="mx-auto mb-4" title="" />
       <h1 className="mb-2 text-4xl">404</h1>
       <p className="mb-6 text-lg font-semibold text-muted-foreground">This page went broke. It doesn't exist.</p>
-      <a href="/" className="btn-chunky btn-accent">
+      <Link to="/" className="btn-chunky btn-accent">
         Back to home
-      </a>
+      </Link>
     </div>
   </main>
 );
