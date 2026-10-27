@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { RiseWords } from "./fx/Motion";
 import { Blobs } from "./product/ProductUI";
-import PhoneMockup from "./product/PhoneMockup";
+import PhoneShowcase from "./product/PhoneShowcase";
 import { Link } from "react-router-dom";
 import { SITE } from "@/config/site";
 
@@ -55,7 +55,7 @@ const HeroSection = () => (
       </div>
 
       <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}>
-        <PhoneMockup />
+        <PhoneShowcase />
       </motion.div>
     </div>
   </section>

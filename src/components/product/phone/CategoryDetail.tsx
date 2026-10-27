@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { ChevronLeft, Lock } from "lucide-react";
 import BrokieMascot from "../../brand/BrokieMascot";
+import { CATEGORY_ICONS } from "./icons";
 import { CATEGORIES, TRANSACTIONS, weeklyTotals, type SpendCategory } from "@/data/transactions";
 import { categoryInsight } from "@/data/insights";
 
@@ -11,6 +12,7 @@ const day = (date: string) => new Date(date).toLocaleDateString("en-GB", { day: 
 const CategoryDetail = ({ id, locked, onBack }: { id: SpendCategory; locked: boolean; onBack: () => void }) => {
   const backRef = useRef<HTMLButtonElement>(null);
   const cat = CATEGORIES.find((c) => c.id === id)!;
+  const Icon = CATEGORY_ICONS[id];
   const insight = categoryInsight(id);
   const weeks = weeklyTotals(id);
   const maxWeek = Math.max(...weeks, 1);
@@ -20,75 +22,60 @@ const CategoryDetail = ({ id, locked, onBack }: { id: SpendCategory; locked: boo
   useEffect(() => backRef.current?.focus({ preventScroll: true }), []);
 
   return (
-    <div className="px-4 pb-4" onKeyDown={(e) => e.key === "Escape" && onBack()}>
+    <div className="px-5 pb-4" onKeyDown={(e) => e.key === "Escape" && onBack()}>
       <button
         ref={backRef}
         type="button"
         onClick={onBack}
-        className="inline-flex items-center gap-0.5 -ml-1 rounded-lg px-1.5 py-1 text-[12px] font-black text-white/70 hover:text-white hover:bg-white/[0.06]"
+        className="inline-flex items-center gap-0.5 -ml-1.5 rounded-lg px-1.5 py-1 text-[12px] font-extrabold text-white/60 hover:text-white"
       >
         <ChevronLeft className="w-4 h-4" aria-hidden="true" /> Path
       </button>
 
       <div className="flex items-center gap-3 mt-2">
-        <span
-          className="w-12 h-12 shrink-0 rounded-2xl flex items-center justify-center text-[24px]"
-          style={{ background: `color-mix(in srgb, ${cat.color} 30%, transparent)`, boxShadow: `inset 0 0 0 1.5px ${cat.color}` }}
-          aria-hidden="true"
-        >
-          {cat.emoji}
+        <span className="w-11 h-11 shrink-0 rounded-xl flex items-center justify-center" style={{ background: `color-mix(in srgb, ${cat.color} 22%, transparent)`, color: cat.color }}>
+          <Icon className="w-5 h-5" strokeWidth={2.5} aria-hidden="true" />
         </span>
         <div className="min-w-0">
-          <h2 className="text-[20px] font-black leading-tight">{cat.label}</h2>
-          <p className="text-[12px] font-bold text-white/65 tabular">
-            {eur(insight.total)} · {insight.share}% of October · {insight.count} {insight.count === 1 ? "payment" : "payments"}
+          <h2 className="text-[19px] font-black leading-tight">{cat.label}</h2>
+          <p className="text-[12px] font-bold text-white/55 tabular">
+            {eur(insight.total)} · {insight.share}% of October
           </p>
         </div>
       </div>
 
       {locked && (
-        <p className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-white/[0.07] px-2.5 py-1 text-[11px] font-extrabold text-white/70">
-          <Lock className="w-3 h-3" aria-hidden="true" /> Level locked: beat Delivery first
+        <p className="mt-3 inline-flex items-center gap-1.5 text-[11px] font-extrabold text-white/55">
+          <Lock className="w-3 h-3" aria-hidden="true" /> Locked until you beat Delivery
         </p>
       )}
 
       {/* Brokie's take */}
-      <div className="flex items-end gap-2 mt-4">
-        <BrokieMascot mood={insight.mood} size={48} className="shrink-0" title="" />
-        <p className="mb-3 rounded-2xl rounded-bl-sm bg-white text-[hsl(258_52%_12%)] px-3 py-2 text-[12.5px] font-extrabold leading-snug">{insight.text}</p>
+      <div className="flex gap-2.5 mt-4 rounded-2xl bg-white/[0.06] p-3">
+        <BrokieMascot mood={insight.mood} size={34} className="shrink-0" title="" />
+        <p className="text-[12.5px] font-bold leading-snug text-white/90">{insight.text}</p>
       </div>
 
       {/* week by week */}
-      <h3 className="text-[12px] font-black tracking-[0.08em] text-white/60 mt-4 mb-2">BY WEEK</h3>
-      <div className="glass rounded-2xl px-3 pt-3 pb-2">
-        <div className="flex items-end justify-between gap-2 h-[84px]" role="img" aria-label={`Weekly spending: ${weeks.map((w, i) => `week ${i + 1} ${eur(w)}`).join(", ")}`}>
-          {weeks.map((w, i) => (
-            <div key={i} className="flex-1 flex flex-col items-center justify-end h-full gap-1">
-              <span className={`text-[10px] font-black tabular ${i === peak ? "text-accent" : "text-white/60"}`}>€{w.toFixed(0)}</span>
-              <span
-                className="w-full rounded-md"
-                style={{ height: `${Math.max(4, (w / maxWeek) * 56)}px`, background: i === peak ? "hsl(var(--accent))" : "rgba(255,255,255,.18)" }}
-              />
-            </div>
-          ))}
-        </div>
-        <div className="flex justify-between gap-2 mt-1.5" aria-hidden="true">
-          {weeks.map((_, i) => (
-            <span key={i} className="flex-1 text-center text-[10px] font-extrabold text-white/50">
-              W{i + 1}
-            </span>
-          ))}
-        </div>
+      <h3 className="text-[11px] font-extrabold text-white/50 mt-5 mb-2">By week</h3>
+      <div className="flex items-end justify-between gap-3 h-[78px]" role="img" aria-label={`Weekly spending: ${weeks.map((w, i) => `week ${i + 1} ${eur(w)}`).join(", ")}`}>
+        {weeks.map((w, i) => (
+          <div key={i} className="flex-1 flex flex-col items-center justify-end h-full gap-1">
+            <span className={`text-[10px] font-black tabular ${i === peak ? "text-accent" : "text-white/50"}`}>€{w.toFixed(0)}</span>
+            <span className="w-full rounded-md" style={{ height: `${Math.max(4, (w / maxWeek) * 52)}px`, background: i === peak ? "hsl(var(--accent))" : "rgba(255,255,255,.14)" }} />
+            <span className="text-[10px] font-extrabold text-white/40">W{i + 1}</span>
+          </div>
+        ))}
       </div>
 
       {/* payments */}
-      <h3 className="text-[12px] font-black tracking-[0.08em] text-white/60 mt-4 mb-2">PAYMENTS</h3>
-      <ul className="space-y-1">
+      <h3 className="text-[11px] font-extrabold text-white/50 mt-5 mb-1">Payments · {payments.length}</h3>
+      <ul className="divide-y divide-white/[0.07]">
         {payments.map((t) => (
-          <li key={t.id} className="flex items-center justify-between gap-2 rounded-xl bg-white/[0.05] px-3 py-2">
+          <li key={t.id} className="flex items-center justify-between gap-2 py-2">
             <span className="min-w-0">
               <span className="block text-[12.5px] font-extrabold truncate">{t.merchant}</span>
-              <span className="block text-[11px] font-bold text-white/55">{day(t.date)}</span>
+              <span className="block text-[11px] font-bold text-white/45">{day(t.date)}</span>
             </span>
             <span className="text-[13px] font-black tabular">−{eur(t.amount)}</span>
           </li>

@@ -4,7 +4,7 @@ import BrokieMascot from "../../brand/BrokieMascot";
 import { levelTitle } from "@/data/challenges";
 import { useGame } from "@/hooks/use-game";
 
-const BURST = ["⭐", "🪙", "✨", "🍌", "⭐", "🪙", "✨", "🎉", "⭐", "🪙", "✨", "🎉"];
+const BURST = Array.from({ length: 12 }, (_, i) => (i % 3 === 0 ? "bg-primary-glow" : "bg-accent"));
 
 /* Full-screen celebration inside the phone when a new level is reached. */
 const LevelUpOverlay = () => {
@@ -28,23 +28,21 @@ const LevelUpOverlay = () => {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onKeyDown={(e) => e.key === "Escape" && dismissLevelUp()}
-          className="absolute inset-0 z-40 flex flex-col items-center justify-center px-6 text-center bg-[hsl(258_55%_8%/0.82)] backdrop-blur-md"
+          className="absolute inset-0 z-40 flex flex-col items-center justify-center px-6 text-center bg-[hsl(258_42%_10%/0.94)]"
         >
           <div className="relative">
             {!still &&
-              BURST.map((e, i) => {
+              BURST.map((color, i) => {
                 const angle = (i / BURST.length) * Math.PI * 2;
                 return (
                   <motion.span
                     key={i}
                     aria-hidden="true"
-                    className="absolute left-1/2 top-1/2 text-[20px]"
+                    className={`absolute left-1/2 top-1/2 rounded-full ${color} ${i % 2 ? "w-2 h-2" : "w-3 h-3"}`}
                     initial={{ x: "-50%", y: "-50%", opacity: 0, scale: 0.4 }}
                     animate={{ x: `calc(-50% + ${Math.cos(angle) * 110}px)`, y: `calc(-50% + ${Math.sin(angle) * 110}px)`, opacity: [0, 1, 1, 0], scale: 1 }}
                     transition={{ duration: 1.4, delay: 0.15, ease: "easeOut" }}
-                  >
-                    {e}
-                  </motion.span>
+                  />
                 );
               })}
             <motion.div
@@ -60,9 +58,9 @@ const LevelUpOverlay = () => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.25 }}
-            className="mt-4 text-[13px] font-black tracking-[0.18em] text-accent"
+            className="mt-4 text-[12px] font-black tracking-[0.16em] text-accent"
           >
-            LEVEL UP!
+            LEVEL UP
           </motion.p>
           <motion.h2
             id="level-up-title"
@@ -75,9 +73,6 @@ const LevelUpOverlay = () => {
           </motion.h2>
           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} className="text-[16px] font-extrabold text-white/85">
             You're now a <span className="text-accent">{levelTitle(level)}</span>
-          </motion.p>
-          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }} className="mt-2 text-[12.5px] font-bold text-white/65">
-            Brokie is doing a little coin spin. You earned it.
           </motion.p>
 
           <motion.button
