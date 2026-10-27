@@ -3,13 +3,15 @@ import HeroSection from "@/components/HeroSection";
 import ProblemSection from "@/components/ProblemSection";
 import HowItWorksSection from "@/components/HowItWorksSection";
 import SpendingSection from "@/components/SpendingSection";
-import NotificationsSection from "@/components/NotificationsSection";
+import BudgetGoalsSection from "@/components/BudgetGoalsSection";
 import GamificationSection from "@/components/GamificationSection";
+import NotificationsSection from "@/components/NotificationsSection";
 import BanksSection from "@/components/BanksSection";
-import WaitlistSection from "@/components/WaitlistSection";
+import FinalCtaSection from "@/components/FinalCtaSection";
 import Footer from "@/components/Footer";
 import { ToneProvider } from "@/hooks/use-tone";
 
+/* Story: what Brokie is → why → how → understand → plan → habits → personality → banks → try it. */
 const Index = () => (
   <ToneProvider>
     <Navbar />
@@ -18,10 +20,11 @@ const Index = () => (
       <ProblemSection />
       <HowItWorksSection />
       <SpendingSection />
-      <NotificationsSection />
+      <BudgetGoalsSection />
       <GamificationSection />
+      <NotificationsSection />
       <BanksSection />
-      <WaitlistSection />
+      <FinalCtaSection />
     </main>
     <Footer />
   </ToneProvider>

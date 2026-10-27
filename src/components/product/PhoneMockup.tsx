@@ -88,7 +88,7 @@ const PhoneScreen = () => {
   };
 
   return (
-    <PhoneFrame label="Interactive preview of the Brokie app" float={false}>
+    <PhoneFrame label="Interactive preview of the Brokie app">
       {/* Brokie banner */}
       <AnimatePresence>
         {banner && (

@@ -12,14 +12,14 @@ export type Transaction = {
 };
 
 /* Display order, labels and chart colour token (see --chart-* in index.css) for each spending category. */
-export const CATEGORIES: { id: SpendCategory; label: string; emoji: string; color: string }[] = [
-  { id: "rent", label: "Rent", emoji: "🏠", color: "hsl(var(--chart-1))" },
-  { id: "groceries", label: "Groceries", emoji: "🛒", color: "hsl(var(--chart-2))" },
-  { id: "delivery", label: "Food delivery", emoji: "🛵", color: "hsl(var(--chart-3))" },
-  { id: "transport", label: "Transport", emoji: "🚌", color: "hsl(var(--chart-4))" },
-  { id: "subscriptions", label: "Subscriptions", emoji: "📺", color: "hsl(var(--chart-5))" },
-  { id: "goingOut", label: "Going out", emoji: "🍻", color: "hsl(var(--chart-6))" },
-  { id: "other", label: "Other", emoji: "🧾", color: "hsl(var(--chart-7))" },
+export const CATEGORIES: { id: SpendCategory; label: string; color: string }[] = [
+  { id: "rent", label: "Rent", color: "hsl(var(--chart-1))" },
+  { id: "groceries", label: "Groceries", color: "hsl(var(--chart-2))" },
+  { id: "delivery", label: "Food delivery", color: "hsl(var(--chart-3))" },
+  { id: "transport", label: "Transport", color: "hsl(var(--chart-4))" },
+  { id: "subscriptions", label: "Subscriptions", color: "hsl(var(--chart-5))" },
+  { id: "goingOut", label: "Going out", color: "hsl(var(--chart-6))" },
+  { id: "other", label: "Other", color: "hsl(var(--chart-7))" },
 ];
 
 export const TRANSACTIONS: Transaction[] = [

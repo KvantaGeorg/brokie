@@ -1,128 +1,100 @@
-import { useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import { Blobs, FadeUp, SectionHeader } from "./product/ProductUI";
-import { LevelBadge, ProgressBar, StreakFlame, XpPill } from "./product/GameUI";
+import { Check, Flame, Target, Trophy, Users, Zap } from "lucide-react";
+import { SectionHeader } from "./product/ProductUI";
+import { ProgressBar } from "./product/GameUI";
 import BrokieMascot from "./brand/BrokieMascot";
 import { FRIENDS, PROFILE, levelTitle, levelXp } from "@/data/challenges";
+import { SUGGESTED_BUDGET, thisMonth } from "@/data/budget";
 
-const LEVEL_XP = levelXp(PROFILE.level);
-const CHECK_IN_XP = 20;
+const features = [
+  { icon: Target, title: "Personalized challenges", desc: "Challenges based on your spending, not random financial advice.", example: "Stay under €55 on delivery this month." },
+  { icon: Zap, title: "XP & levels", desc: "Earn XP for completed challenges and consistent engagement.", example: `Level ${PROFILE.level}, ${levelTitle(PROFILE.level)}.` },
+  { icon: Users, title: "Streaks & friends", desc: "Keep your daily check-in streak alive and see how your friends are progressing.", example: `${PROFILE.streak}-day streak.` },
+];
 
-const medal = ["🥇", "🥈", "🥉"];
-
-const GamificationSection = () => {
-  const [checkedIn, setCheckedIn] = useState(false);
-  const streak = PROFILE.streak + (checkedIn ? 1 : 0);
-  const xp = PROFILE.xp + (checkedIn ? CHECK_IN_XP : 0);
-  const weekXp = PROFILE.weekXp + (checkedIn ? CHECK_IN_XP : 0);
-
-  const league = [...FRIENDS, { name: "You", xp: weekXp, emoji: "🪙" }].sort((a, b) => b.xp - a.xp);
-
+/* One preview that combines a challenge, level progress, the streak and a glance at friends. */
+const Preview = () => {
+  const spent = thisMonth.byCategory("delivery");
+  const top = [...FRIENDS.slice(0, 2), { name: "You", xp: PROFILE.weekXp }].sort((a, b) => b.xp - a.xp);
   return (
-    <section id="gamification" className="relative py-24 lg:py-36">
-      <Blobs variant={2} />
-      <div className="relative container mx-auto px-4 sm:px-6 lg:px-8">
-        <SectionHeader
-          label="Gamification"
-          title="Saving money, but make it a game."
-          desc="Streaks, XP, levels and weekly challenges built from your own spending. Not lessons. Just a better month, every month."
-        />
-
-        <div className="grid lg:grid-cols-[1.15fr_1fr] gap-5">
-          <div className="grid sm:grid-cols-2 gap-5">
-            {/* Streak */}
-            <FadeUp className="glass rounded-3xl p-6 flex flex-col items-center text-center">
-              <p className="micro-label">Daily streak</p>
-              <div className="relative text-[56px] mt-3">
-                <StreakFlame count={streak} />
-                <AnimatePresence>
-                  {checkedIn && (
-                    <motion.span
-                      initial={{ opacity: 0, y: 0 }}
-                      animate={{ opacity: [0, 1, 0], y: -40 }}
-                      transition={{ duration: 1.2 }}
-                      className="absolute -top-2 right-0 text-[18px] font-black text-accent"
-                      aria-hidden="true"
-                    >
-                      +{CHECK_IN_XP} XP
-                    </motion.span>
-                  )}
-                </AnimatePresence>
-              </div>
-              <p className="text-muted-foreground font-semibold mt-1 mb-5">days in a row of checking in</p>
-              <button type="button" onClick={() => setCheckedIn(true)} disabled={checkedIn} className="btn-chunky btn-accent w-full mt-auto">
-                {checkedIn ? "Checked in ✓" : "Do today's check-in"}
-              </button>
-            </FadeUp>
-
-            {/* Level + XP */}
-            <FadeUp delay={0.06} className="glass rounded-3xl p-6 flex flex-col">
-              <p className="micro-label">Level</p>
-              <div className="flex items-center gap-4 mt-3">
-                <LevelBadge level={PROFILE.level} className="text-[22px] h-16 w-16 rounded-2xl" />
-                <div>
-                  <p className="text-[20px] font-black leading-tight">{levelTitle(PROFILE.level)}</p>
-                  <XpPill xp={xp} className="text-[16px]" />
-                </div>
-              </div>
-              <ProgressBar value={xp} max={LEVEL_XP} label={`XP towards level ${PROFILE.level + 1}`} className="mt-6 h-4" />
-              <p className="text-[14px] font-bold text-muted-foreground mt-2 tabular">
-                {xp} / {LEVEL_XP} XP to Level {PROFILE.level + 1} · {levelTitle(PROFILE.level + 1)}
-              </p>
-            </FadeUp>
-
-            {/* Weekly challenge */}
-            <FadeUp delay={0.12} className="sm:col-span-2 glass-strong rounded-3xl p-6 flex items-center gap-5">
-              <BrokieMascot mood="happy" size={80} className="shrink-0 hidden sm:block" title="" />
-              <div className="flex-1">
-                <div className="flex items-center justify-between gap-3">
-                  <p className="micro-label">Monthly challenge</p>
-                  <span className="text-[13px] font-extrabold text-muted-foreground">16 days left · +50 XP</span>
-                </div>
-                <p className="text-[20px] font-black mt-1">Stay under €55 on food delivery this month</p>
-                <ProgressBar value={43} max={55} label="Delivery budget used" className="mt-4 h-4" />
-                <p className="text-[14px] font-bold text-muted-foreground mt-2">€43 of €55 used, €12 left. Choose wisely. 🍌</p>
-              </div>
-            </FadeUp>
+    <div className="surface rounded-3xl p-6 sm:p-8">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <BrokieMascot mood="proud" size={44} title="" />
+          <div>
+            <p className="text-[18px] font-black leading-tight">
+              Level {PROFILE.level} · {levelTitle(PROFILE.level)}
+            </p>
+            <p className="text-[13px] font-bold text-muted-foreground tabular">
+              {PROFILE.xp} / {levelXp(PROFILE.level)} XP
+            </p>
           </div>
-
-          {/* Friend league */}
-          <FadeUp delay={0.1} className="glass rounded-3xl p-6">
-            <table className="w-full text-left">
-              <caption className="text-left mb-4">
-                <span className="micro-label block">Friend league</span>
-                <span className="block text-[20px] font-black text-foreground mt-1">This week's XP</span>
-              </caption>
-              <thead className="sr-only">
-                <tr>
-                  <th scope="col">Rank</th>
-                  <th scope="col">Name</th>
-                  <th scope="col">XP</th>
-                </tr>
-              </thead>
-              <tbody>
-                {league.map((f, i) => {
-                  const you = f.name === "You";
-                  return (
-                    <motion.tr layout key={f.name} className={you ? "bg-primary/35" : ""}>
-                      <td className={`py-3 pl-3 w-10 text-[18px] font-black tabular ${you ? "rounded-l-2xl" : ""}`}>{medal[i] ?? i + 1}</td>
-                      <td className="py-3 text-[16px] font-extrabold">
-                        <span className="mr-2" aria-hidden="true">
-                          {f.emoji}
-                        </span>
-                        {f.name}
-                      </td>
-                      <td className={`py-3 pr-3 text-right text-[16px] font-black text-accent tabular ${you ? "rounded-r-2xl" : ""}`}>{f.xp} XP</td>
-                    </motion.tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </FadeUp>
         </div>
+        <span className="inline-flex items-center gap-1.5 text-[15px] font-black text-chart-6">
+          <Flame className="w-5 h-5" strokeWidth={2.25} aria-hidden="true" /> {PROFILE.streak}
+          <span className="sr-only">day streak</span>
+        </span>
       </div>
-    </section>
+      <ProgressBar value={PROFILE.xp} max={levelXp(PROFILE.level)} label={`XP towards level ${PROFILE.level + 1}`} className="mt-4" />
+
+      <div className="mt-6 rounded-2xl border border-white/10 p-4">
+        <div className="flex items-start justify-between gap-3">
+          <p className="text-[16px] font-extrabold leading-snug">Stay under €{SUGGESTED_BUDGET.delivery} on delivery this month</p>
+          <span className="text-[13px] font-black text-accent shrink-0">+50 XP</span>
+        </div>
+        <ProgressBar value={spent} max={SUGGESTED_BUDGET.delivery} label="Delivery budget used" className="mt-3" />
+        <p className="text-[13px] font-bold text-muted-foreground mt-2 tabular">
+          €{Math.round(spent)} of €{SUGGESTED_BUDGET.delivery} used · 16 days left
+        </p>
+      </div>
+
+      <div className="mt-4 flex items-center justify-between rounded-2xl border border-white/10 p-4">
+        <span className="flex items-center gap-2 text-[14px] font-extrabold">
+          <Trophy className="w-4 h-4 text-accent" aria-hidden="true" /> Friends this week
+        </span>
+        <span className="flex items-center gap-2">
+          {top.map((f) => (
+            <span
+              key={f.name}
+              title={`${f.name}: ${f.xp} XP`}
+              className={`w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-black ${f.name === "You" ? "bg-accent text-accent-foreground" : "bg-white/10"}`}
+            >
+              {f.name[0]}
+            </span>
+          ))}
+          <span className="text-[13px] font-bold text-muted-foreground ml-1">You're #3</span>
+        </span>
+      </div>
+
+      <p className="mt-5 flex items-center gap-2 text-[13px] font-bold text-muted-foreground">
+        <Check className="w-4 h-4 text-chart-2" aria-hidden="true" /> XP measures progress in Brokie, not money.
+      </p>
+    </div>
   );
 };
+
+const GamificationSection = () => (
+  <section id="gamification" className="section section-alt">
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+      <SectionHeader label="Gamification" title="Better habits. Bigger wins." desc="Turn everyday financial decisions into small challenges, build your streak, and level up along the way." />
+      <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+        <ul className="space-y-8">
+          {features.map(({ icon: Icon, title, desc, example }) => (
+            <li key={title} className="flex gap-4">
+              <span className="w-11 h-11 shrink-0 rounded-xl bg-primary/15 text-primary-glow flex items-center justify-center">
+                <Icon className="w-5 h-5" strokeWidth={2} aria-hidden="true" />
+              </span>
+              <div>
+                <h3 className="text-[20px]">{title}</h3>
+                <p className="text-[16px] font-semibold text-muted-foreground mt-1">{desc}</p>
+                <p className="text-[14px] font-bold text-foreground/80 mt-2">{example}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
+        <Preview />
+      </div>
+    </div>
+  </section>
+);
 
 export default GamificationSection;

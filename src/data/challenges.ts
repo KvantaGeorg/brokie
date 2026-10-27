@@ -39,9 +39,9 @@ export const levelTitle = (level: number) => LEVEL_TITLES[level] ?? "Broke-No-Mo
 export const levelXp = (level: number) => 500 + Math.max(0, level - 7) * 100;
 
 export const FRIENDS = [
-  { name: "Gabija", xp: 410, emoji: "🦊" },
-  { name: "Matas", xp: 365, emoji: "🐻" },
-  { name: "Emilija", xp: 290, emoji: "🐸" },
-  { name: "Lukas", xp: 255, emoji: "🐧" },
-  { name: "Sofia", xp: 180, emoji: "🐱" },
+  { name: "Gabija", xp: 410 },
+  { name: "Matas", xp: 365 },
+  { name: "Emilija", xp: 290 },
+  { name: "Lukas", xp: 255 },
+  { name: "Sofia", xp: 180 },
 ];

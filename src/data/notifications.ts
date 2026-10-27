@@ -1,112 +1,48 @@
 import type { SpendCategory } from "./transactions";
 import { toEquivalent, type Equivalent } from "./equivalents";
 
-/* Brokie's push notifications. Tone rule: joke about the situation, never insult the person,
-   and mix in praise regularly. */
+/* Brokie's notifications on the landing page. Tone rule: joke about the situation, never the person,
+   never shame essentials, and mix in praise. No emoji. */
 
 export type Tone = "gentle" | "savage";
-export type NotificationGroup = "couldve" | "watching" | "proud" | "headsUp";
 export type Mood = "happy" | "proud" | "watching" | "shocked";
 
-export type BrokieNotification = {
-  id: string;
-  group: NotificationGroup;
-  mood: Mood;
-  time: string;
-  text: Record<Tone, string>;
-};
+export type ExampleNotification = { id: string; label: string; mood: Mood; time: string; text: Record<Tone, string> };
 
-export const GROUPS: { id: NotificationGroup; title: string }[] = [
-  { id: "couldve", title: "You could've bought..." },
-  { id: "watching", title: "Brokie is watching" },
-  { id: "proud", title: "Proud moments" },
-  { id: "headsUp", title: "Heads up" },
-];
-
-export const NOTIFICATIONS: BrokieNotification[] = [
+export const EXAMPLES: ExampleNotification[] = [
   {
-    id: "wolt-bananas",
-    group: "couldve",
-    mood: "shocked",
-    time: "now",
+    id: "delivery-limit",
+    label: "Budget heads-up",
+    mood: "watching",
+    time: "18:40",
     text: {
-      gentle: "That €15 Wolt order = 10 kg of bananas. Just saying. 🍌",
-      savage: "That €15 Wolt order = 10 kg of bananas. You could've been a monkey king. 🍌",
-    },
-  },
-  {
-    id: "coffee-riga",
-    group: "couldve",
-    mood: "shocked",
-    time: "2h ago",
-    text: {
-      gentle: "This month's coffees add up to €16. That's a bus ticket to Riga, almost exactly. ☕🚍",
-      savage: "€16 on coffee this month. Riga called. It wanted to be visited, not drunk. ☕🚍",
+      gentle: "Your delivery spending is getting close to this month's limit. You've got this.",
+      savage: "€12 left for delivery this month. That's one pizza. Make it count.",
     },
   },
   {
     id: "two-am",
-    group: "watching",
-    mood: "watching",
+    label: "Late-night order",
+    mood: "shocked",
     time: "02:07",
     text: {
-      gentle: "Bolt Food at 2 AM? Late study session, we get it. Maybe stock some noodles next time. 🍜",
-      savage: "Bolt Food. At 2 AM. Again. Brokie is just... watching.",
+      gentle: "Bolt Food at 2 AM? Late study session, we get it. Maybe keep some noodles at home.",
+      savage: "Bolt Food. At 2 AM. Again. Brokie is just watching.",
     },
   },
   {
-    id: "miss-you",
-    group: "watching",
-    mood: "watching",
-    time: "yesterday",
-    text: {
-      gentle: "Haven't seen you in 3 days! Pop in, your streak misses you. 👀",
-      savage: "Brokie hasn't seen you in 3 days. Brokie is not crying. Brokie is fine.",
-    },
-  },
-  {
-    id: "no-delivery",
-    group: "proud",
-    mood: "proud",
-    time: "9:41",
-    text: {
-      gentle: "No delivery for 5 days! Brokie is shedding a single proud tear. 🥹",
-      savage: "5 days, zero delivery. Wolt couriers are asking if you moved. Legend. 🏆",
-    },
-  },
-  {
-    id: "saved-bananas",
-    group: "proud",
+    id: "bananas",
+    label: "Funny equivalent",
     mood: "happy",
-    time: "Sun",
+    time: "now",
     text: {
-      gentle: "You saved €23 this week. That's 15 kg of bananas in the bank. 🍌🏦",
-      savage: "€23 saved this week. 15 kg of bananas in the bank. The monkey king rises. 🍌👑",
-    },
-  },
-  {
-    id: "netflix",
-    group: "headsUp",
-    mood: "watching",
-    time: "tomorrow",
-    text: {
-      gentle: "Netflix renews tomorrow. Still watching, or just vibes?",
-      savage: "Netflix renews tomorrow. €9.99 for a show you fall asleep to. Your call. 📺",
-    },
-  },
-  {
-    id: "streak",
-    group: "headsUp",
-    mood: "shocked",
-    time: "21:30",
-    text: {
-      gentle: "Your 12-day streak ends at midnight. One quick check-in keeps it alive! 🔥",
-      savage: "Your streak is about to die. Like your bank balance. 💀",
+      gentle: "That €15 Wolt order could have bought 10 kg of bananas.",
+      savage: "That €15 Wolt order could have bought 10 kg of bananas. Monkey king energy, wasted.",
     },
   },
 ];
 
-/* Category phrasing used by the "make your own notification" demo. */
+/* Category phrasing used by the "Try Brokie" generator. */
 export const DEMO_CATEGORIES: { id: SpendCategory; label: string; noun: string }[] = [
   { id: "delivery", label: "Food delivery", noun: "delivery order" },
   { id: "goingOut", label: "Going out", noun: "night out" },
@@ -118,14 +54,14 @@ export const DEMO_CATEGORIES: { id: SpendCategory; label: string; noun: string }
 
 const DEMO_TEMPLATES: Record<Tone, string[]> = {
   gentle: [
-    "That €{amount} {noun} = {equivalent}. Just saying. {emoji}",
-    "Fun fact: €{amount} on that {noun} is {equivalent}. No judgement, only maths. {emoji}",
-    "€{amount} {noun}? That's {equivalent}. Brokie believes in you anyway. {emoji}",
+    "That €{amount} {noun} could have bought {equivalent}. Just saying.",
+    "Fun fact: €{amount} on that {noun} is {equivalent}. No judgement, only maths.",
+    "€{amount} {noun}? That's {equivalent}. Brokie believes in you anyway.",
   ],
   savage: [
-    "That €{amount} {noun} = {equivalent}. Brokie did the maths so you didn't have to. {emoji}",
-    "€{amount} on a {noun}. Or {equivalent}. Brokie is not mad. Brokie is calculating. {emoji}",
-    "{equivalent}. That's what that €{amount} {noun} could've been. Think about it. {emoji}",
+    "That €{amount} {noun} = {equivalent}. Brokie did the maths so you didn't have to.",
+    "€{amount} on a {noun}. Or {equivalent}. Brokie is not mad. Brokie is calculating.",
+    "{equivalent}. That's what that €{amount} {noun} could have been. Think about it.",
   ],
 };
 
@@ -134,10 +70,6 @@ export const buildDemoNotification = (amount: number, category: SpendCategory, t
   const e = toEquivalent(amount, eq);
   const templates = DEMO_TEMPLATES[tone];
   const amountText = Number.isInteger(amount) ? String(amount) : amount.toFixed(2);
-  const text = templates[variant % templates.length]
-    .replace("{amount}", amountText)
-    .replace("{noun}", cat.noun)
-    .replace("{equivalent}", e.text)
-    .replace("{emoji}", e.emoji);
+  const text = templates[variant % templates.length].replace("{amount}", amountText).replace("{noun}", cat.noun).replace("{equivalent}", e.text);
   return text.charAt(0).toUpperCase() + text.slice(1);
 };

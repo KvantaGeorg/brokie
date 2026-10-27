@@ -19,10 +19,7 @@ export const categoryInsight = (id: SpendCategory): { text: string; mood: Mood; 
       const weeks = weeklyTotals("delivery");
       const avg = weeks.reduce((a, b) => a + b, 0) / weeks.length;
       const last = weeks[weeks.length - 1];
-      return result(
-        `Food delivery: ${eur(last)} in the last week of the month, ${(last / avg).toFixed(1)}x your weekly average. One of those orders landed at 2 AM.`,
-        "shocked",
-      );
+      return result(`Food delivery reached ${eur(last)} in the final week. That's ${(last / avg).toFixed(1)} times your weekly average.`, "shocked");
     }
     case "rent":
       return result(`Rent is ${share}% of everything you spent. It's fixed, so Brokie leaves it alone and focuses on the rest.`, "happy");

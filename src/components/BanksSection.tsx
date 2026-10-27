@@ -1,42 +1,88 @@
-import { CalendarCheck, Palette, Users } from "lucide-react";
-import { Blobs, FadeUp } from "./product/ProductUI";
+import { ArrowDownLeft, ArrowUpRight, Building2, CalendarCheck, Palette, Send } from "lucide-react";
+import { SectionHeader } from "./product/ProductUI";
+import { ProgressBar } from "./product/GameUI";
+import BrokieMascot from "./brand/BrokieMascot";
 
-const points = [
-  { icon: Palette, title: "White-label", desc: "Your colours, your app. Brokie's mascot and game layer plug into your mobile banking." },
-  { icon: CalendarCheck, title: "Daily engagement", desc: "Streaks and challenges give 18–25 year olds a reason to open the bank app every day." },
-  { icon: Users, title: "Customers for life", desc: "Help students build good habits now, and they grow up with your bank." },
+const benefits = [
+  { icon: Palette, title: "White-label experience", desc: "Adapt Brokie's financial insights, budgeting, goals, and gamification to a bank's brand." },
+  { icon: CalendarCheck, title: "Everyday engagement", desc: "Give younger customers useful reasons to return to their banking app." },
+  { icon: Building2, title: "Long-term relationships", desc: "Help banks build stronger relationships with students as their financial needs evolve." },
 ];
 
-const BanksSection = () => (
-  <section id="banks" className="relative py-24 lg:py-32 bg-subtle">
-    <Blobs variant={0} />
-    <div className="relative container mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="glass-strong rounded-[32px] p-7 sm:p-10 lg:p-14 grid lg:grid-cols-[0.9fr_1.1fr] gap-10 items-center">
-        <div>
-          <p className="micro-label mb-4">For banks</p>
-          <h2 className="leading-[1.08]" style={{ fontSize: "clamp(28px, 3.6vw, 42px)" }}>
-            Young customers open TikTok every day. Make your app the next habit.
-          </h2>
-          <p className="text-muted-foreground text-[17px] font-semibold mt-4">
-            Banks can white-label Brokie to engage young customers every day, with real spending data they already have.
-          </p>
+/* A generic, unbranded banking app with a Brokie module inside it. */
+const BankMock = () => (
+  <div className="mx-auto w-full max-w-[360px] rounded-[28px] border border-white/10 bg-[hsl(230_25%_12%)] p-5" aria-hidden="true">
+    <div className="flex items-center justify-between">
+      <span className="flex items-center gap-2 text-[13px] font-extrabold text-white/70">
+        <span className="w-6 h-6 rounded-md bg-white/15" /> Your Bank
+      </span>
+      <span className="w-7 h-7 rounded-full bg-white/10" />
+    </div>
+    <p className="text-[12px] font-bold text-white/50 mt-5">Current account</p>
+    <p className="text-[28px] font-black tabular">€236.68</p>
+    <div className="grid grid-cols-3 gap-2 mt-4">
+      {[
+        { icon: Send, label: "Pay" },
+        { icon: ArrowDownLeft, label: "Request" },
+        { icon: ArrowUpRight, label: "Transfer" },
+      ].map(({ icon: Icon, label }) => (
+        <span key={label} className="flex flex-col items-center gap-1 rounded-xl bg-white/[0.06] py-2.5 text-[11px] font-bold text-white/70">
+          <Icon className="w-4 h-4" />
+          {label}
+        </span>
+      ))}
+    </div>
+
+    <div className="mt-4 rounded-2xl bg-[hsl(258_42%_12%)] border border-primary/40 p-4">
+      <div className="flex items-center gap-2.5">
+        <BrokieMascot mood="happy" size={30} title="" />
+        <span className="text-[13px] font-black">Brokie</span>
+        <span className="ml-auto rounded-md bg-primary px-1.5 py-0.5 text-[10px] font-black">Lv 7</span>
+      </div>
+      <p className="text-[13px] font-bold mt-3">€12 left in your delivery budget</p>
+      <ProgressBar value={43} max={55} label="Delivery budget used" className="mt-2 h-2" />
+      <p className="text-[12px] font-bold text-white/55 mt-3">Trip to Riga · €45 of €150</p>
+    </div>
+
+    <div className="mt-4 space-y-2.5">
+      {["Maxima", "Bolt ride"].map((m, i) => (
+        <div key={m} className="flex justify-between text-[12px] font-bold text-white/60">
+          <span>{m}</span>
+          <span className="tabular">{i ? "−€8.60" : "−€24.60"}</span>
         </div>
-        <ul className="grid sm:grid-cols-3 lg:grid-cols-1 gap-3">
-          {points.map(({ icon: Icon, title, desc }, i) => (
-            <li key={title}>
-              <FadeUp delay={i * 0.06} className="flex gap-4 items-start rounded-2xl bg-white/[0.05] border border-white/10 p-5 h-full">
-                <span className="shrink-0 w-11 h-11 rounded-xl bg-accent text-accent-foreground flex items-center justify-center shadow-[0_3px_0_hsl(var(--accent-deep))]">
-                  <Icon className="w-5 h-5" strokeWidth={2.5} />
-                </span>
-                <span>
-                  <span className="block text-[17px] font-black">{title}</span>
-                  <span className="block text-[15px] text-muted-foreground font-semibold leading-snug mt-0.5">{desc}</span>
-                </span>
-              </FadeUp>
+      ))}
+    </div>
+  </div>
+);
+
+const BanksSection = () => (
+  <section id="banks" className="section section-alt">
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-2 gap-14 lg:gap-16 items-center">
+      <div>
+        <SectionHeader
+          label="For banks"
+          title="Make everyday banking more engaging."
+          desc="Brokie is designed as a white-label financial engagement experience that banks could integrate into their existing mobile apps."
+        />
+        <ul className="space-y-6 -mt-2">
+          {benefits.map(({ icon: Icon, title, desc }) => (
+            <li key={title} className="flex gap-4">
+              <Icon className="w-6 h-6 shrink-0 text-primary-glow mt-0.5" strokeWidth={1.75} aria-hidden="true" />
+              <div>
+                <h3 className="text-[19px]">{title}</h3>
+                <p className="text-[16px] font-semibold text-muted-foreground mt-1">{desc}</p>
+              </div>
             </li>
           ))}
         </ul>
+        <p className="mt-8 text-[14px] font-semibold text-muted-foreground border-l-2 border-white/15 pl-4">
+          This is Brokie's proposed B2B business model. There is no existing commercial integration with any bank.
+        </p>
       </div>
+      <figure>
+        <BankMock />
+        <figcaption className="text-center text-[13px] font-semibold text-muted-foreground mt-4">Concept: Brokie inside a generic banking app.</figcaption>
+      </figure>
     </div>
   </section>
 );
